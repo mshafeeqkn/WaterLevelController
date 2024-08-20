@@ -34,17 +34,13 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-typedef enum {
-    PA,
-    PB,
-    PC
-} stm_gpio_port_t;
 
 typedef enum {
     GPIO_INPUT,
     GPIO_OUTPUT
 } stm_gpio_dir_t;
 
+typedef GPIO_TypeDef*   stm_gpio_port_t;
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
