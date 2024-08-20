@@ -1,9 +1,10 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : pump_tank_monitor.h
-  * @brief          : Header for pump_tank_monitor.c file.
-  *                   This file contains the funciton to monitor the Tank and Pump
+  * @file           : led_indicator.h
+  * @brief          : Header for led_indicator.c file.
+  *                   This file contains the defines of function to drive
+  *                   the LED indicator
   ******************************************************************************
   * @attention
   *
@@ -19,23 +20,22 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __PUMP_TANK_MONITOR_H
-#define __PUMP_TANK_MONITOR_H
+#ifndef __LED_INDICATOR_H
+#define __LED_INDICATOR_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdbool.h>
 #include "stm32f1xx.h"
 #include "common.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 /* USER CODE END EC */
@@ -45,9 +45,9 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void init_tank_pump_monitor();
-tank_level_t get_tank_water_level();
-bool is_pump_running_dry();
+void init_led_indicators();
+
+uint8_t set_water_level(tank_level_t level);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
@@ -57,4 +57,4 @@ bool is_pump_running_dry();
 }
 #endif
 
-#endif /* __PUMP_TANK_MONITOR_H */
+#endif /* __LED_INDICATOR_H */
