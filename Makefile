@@ -40,6 +40,7 @@ Core/Src/main.c \
 Core/Src/system_stm32f1xx.c \
 Core/Src/sysmem.c \
 Core/Src/syscalls.c \
+Core/Src/pump_tank_monitor.c \
 Core/Src/gpio.c
 
 # ASM sources
