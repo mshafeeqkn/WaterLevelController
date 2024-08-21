@@ -31,6 +31,12 @@ extern "C" {
 #include "stm32f1xx.h"
 #include "common.h"
 
+typedef enum {
+    PUMP_RUN,
+    PUMP_DRY_RUN,
+    PUMP_OFF
+} pump_status_t;
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -47,7 +53,7 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void init_led_indicators();
 
-uint8_t set_water_level(tank_level_t level);
+void set_water_level(tank_level_t level);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
