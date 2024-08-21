@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdbool.h>
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -44,7 +45,8 @@ typedef void (*timer_callback_t) ();
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void init_timer_1(uint8_t delay_ms, timer_callback_t callback);
+void init_timer_2(uint8_t delay_ms, timer_callback_t callback);
+void set_timer_2_enable(bool enable);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

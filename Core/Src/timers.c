@@ -59,3 +59,12 @@ void init_timer_2(uint8_t delay_ms, timer_callback_t callback) {
     // Enable the timer.
     TIM2->CR1 |= TIM_CR1_CEN;
 }
+
+void set_timer_2_enable(bool enable) {
+    if(enable) {
+        TIM2->CR1 |= TIM_CR1_CEN;
+    } else {
+        TIM2->CR1 &= ~TIM_CR1_CEN;
+    }
+}
+
