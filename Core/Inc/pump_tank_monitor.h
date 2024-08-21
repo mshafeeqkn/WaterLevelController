@@ -29,21 +29,12 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include <stdbool.h>
 #include "stm32f1xx.h"
-
+#include "common.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-
-typedef enum {
-    TANK_LEVEL_0,
-    TANK_LEVEL_20,
-    TANK_LEVEL_40,
-    TANK_LEVEL_60,
-    TANK_LEVEL_80,
-    TANK_LEVEL_100
-} tank_level_t;
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */

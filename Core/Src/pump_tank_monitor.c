@@ -20,13 +20,6 @@
 #include "pump_tank_monitor.h"
 #include "gpio.h"
 
-#define     WATER_LEVEL_100_PIN       GPIOA,9
-#define     WATER_LEVEL_80_PIN        GPIOA,8
-#define     WATER_LEVEL_60_PIN        GPIOB,15
-#define     WATER_LEVEL_40_PIN        GPIOB,14
-#define     WATER_LEVEL_20_PIN        GPIOB,13
-
-#define     PUMP_DRY_RUN_PIN          GPIOB,12
 
 void init_tank_pump_monitor() {
     // Configure water level pins as input
