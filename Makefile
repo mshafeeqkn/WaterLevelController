@@ -42,6 +42,7 @@ Core/Src/sysmem.c \
 Core/Src/syscalls.c \
 Core/Src/pump_tank_monitor.c \
 Core/Src/led_indicator.c \
+Core/Src/config_mgr.c \
 Core/Src/timers.c \
 Core/Src/i2c.c \
 Core/Src/gpio.c

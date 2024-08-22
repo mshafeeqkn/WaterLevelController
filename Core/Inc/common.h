@@ -42,6 +42,8 @@ extern "C" {
 
 #define     LED_DRY_RUN_PIN           GPIOB,5
 
+#define     I2C_SLAVE_ADDRESS         0x28
+
 typedef enum {
     TANK_LEVEL_0,
     TANK_LEVEL_20,
