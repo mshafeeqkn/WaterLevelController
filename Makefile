@@ -45,6 +45,7 @@ Core/Src/led_indicator.c \
 Core/Src/config_mgr.c \
 Core/Src/timers.c \
 Core/Src/i2c.c \
+Core/Src/rtc.c \
 Core/Src/gpio.c
 
 # ASM sources
