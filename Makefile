@@ -43,6 +43,7 @@ Core/Src/syscalls.c \
 Core/Src/pump_tank_monitor.c \
 Core/Src/led_indicator.c \
 Core/Src/timers.c \
+Core/Src/i2c.c \
 Core/Src/gpio.c
 
 # ASM sources
