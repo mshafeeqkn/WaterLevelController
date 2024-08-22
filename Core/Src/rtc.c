@@ -79,3 +79,24 @@ void init_rtc(alarm_callback_t callback) {
     // Finally, enable the RTC
     RCC->BDCR |= RCC_BDCR_RTCEN;
 }
+
+void set_rtc_time(uint32_t seconds) {
+    // Wait until last write operations on RTC
+    // registers has finished
+    while (!(RTC->CRL & RTC_CRL_RSF));
+
+    // Enter RTC in configuration mode
+    RTC->CRL |= RTC_CRL_CNF;
+
+    // Set the counter value
+    RTC->CNTH = (seconds >> 16) & 0xFFFF;
+    RTC->CNTL = seconds & 0xFFFF;
+
+    // Exit RTC in configuration mode
+    RTC->CRL &= ~RTC_CRL_CNF;
+
+    // Wait until last write operations on RTC
+    // registers has finished
+    while (!(RTC->CRL & RTC_CRL_RSF));
+
+}
