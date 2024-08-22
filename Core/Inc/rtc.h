@@ -46,6 +46,7 @@ typedef void (*alarm_callback_t) ();
 
 /* Exported functions prototypes ---------------------------------------------*/
 void init_rtc(alarm_callback_t callback);
+void set_rtc_time(uint32_t seconds);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
