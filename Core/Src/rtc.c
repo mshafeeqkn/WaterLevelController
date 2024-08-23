@@ -98,5 +98,24 @@ void set_rtc_time(uint32_t seconds) {
     // Wait until last write operations on RTC
     // registers has finished
     while (!(RTC->CRL & RTC_CRL_RSF));
+}
 
+void set_rtc_alarm_time(uint32_t seconds) {
+    // Wait until last write operations on RTC
+    // registers has finished
+    while (!(RTC->CRL & RTC_CRL_RSF));
+
+    // Enter RTC in configuration mode
+    RTC->CRL |= RTC_CRL_CNF;
+
+    // Set the counter value
+    RTC->ALRH = (seconds >> 16) & 0xFFFF;
+    RTC->ALRL = seconds & 0xFFFF;
+
+    // Exit RTC in configuration mode
+    RTC->CRL &= ~RTC_CRL_CNF;
+
+    // Wait until last write operations on RTC
+    // registers has finished
+    while (!(RTC->CRL & RTC_CRL_RSF));
 }
