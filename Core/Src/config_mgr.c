@@ -23,6 +23,7 @@
 #include "common.h"
 
 #define  SET_RTC_TIME       0x10
+#define  SET_PUMPING_TIME       0x30
 
 static void on_new_command(uint8_t *data, uint8_t len) {
     uint32_t i2c_data;
@@ -30,6 +31,11 @@ static void on_new_command(uint8_t *data, uint8_t len) {
         case SET_RTC_TIME:
             i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
             set_rtc_time(i2c_data);
+            break;
+
+        case SET_PUMPING_TIME:
+            i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
+            set_rtc_alarm_time(i2c_data);
             break;
     }
 }
