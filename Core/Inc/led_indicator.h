@@ -52,7 +52,7 @@ typedef enum {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void init_led_indicators();
-
+void set_pump_status(pump_status_t status);
 void set_water_level(tank_level_t level);
 
 /* Private defines -----------------------------------------------------------*/

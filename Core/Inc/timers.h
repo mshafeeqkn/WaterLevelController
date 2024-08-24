@@ -35,7 +35,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-typedef void (*timer_callback_t) ();
+typedef void (*timer_callback_t) (bool done);
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 /* USER CODE END EC */
