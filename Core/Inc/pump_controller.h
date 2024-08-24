@@ -48,6 +48,8 @@ extern "C" {
 void init_water_pump();
 void turn_on_water_pump(uint32_t timeout_sec);
 void turn_off_water_pump();
+void set_one_shot_pumping_time(uint32_t sec);
+uint32_t get_one_shot_pumping_time();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

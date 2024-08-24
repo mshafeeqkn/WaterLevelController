@@ -23,9 +23,12 @@
 #include "common.h"
 
 #define  SET_RTC_TIME           0x10
-#define  GET_RTC_TIME           0x20
-#define  SET_PUMPING_TIME       0x30
-#define  GET_PUMPING_TIME       0x40
+#define  SET_PUMPING_TIME       0x20
+#define  SET_PUMP_RUN_TIME      0x30
+
+#define  GET_RTC_TIME           0x80
+#define  GET_PUMPING_TIME       0x90
+#define  GET_PUMP_RUN_TIME      0xA0
 
 static uint8_t cur_command = 0;
 
@@ -35,37 +38,44 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
 
     if(I2C_MODE_RX == mode) {
         cur_command = data[0];
+        if(cur_command <= 0x7F) {
+            i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
+        }
         switch(cur_command) {
             case SET_RTC_TIME:
-                i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
                 set_rtc_time(i2c_data);
                 break;
 
             case SET_PUMPING_TIME:
-                i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
                 set_rtc_alarm_time(i2c_data);
+                break;
+
+            case SET_PUMP_RUN_TIME:
+                set_one_shot_pumping_time(i2c_data);
                 break;
         }
     } else if(I2C_MODE_TX == mode) {
         switch(cur_command) {
             case GET_RTC_TIME:
                 i2c_data = get_rtc_time();
-                i = 0;
-                while(i2c_data) {
-                    data[i++] = i2c_data & 0xFF;
-                    i2c_data >>= 8;
-                }
                 break;
 
             case GET_PUMPING_TIME:
                 i2c_data = get_rtc_alarm_time();
-                i = 0;
-                while(i2c_data) {
-                    data[i++] = i2c_data & 0xFF;
-                    i2c_data >>= 8;
-                }
+                break;
+
+            case GET_PUMP_RUN_TIME:
+                i2c_data = get_one_shot_pumping_time();
                 break;
         }
+
+        // Set the data to be sent to 'data' variable
+        i = 0;
+        while(i2c_data) {
+            data[i++] = i2c_data & 0xFF;
+            i2c_data >>= 8;
+        }
+
     }
 }
 
