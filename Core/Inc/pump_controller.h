@@ -46,7 +46,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void init_water_pump();
-void turn_on_water_pump();
+void turn_on_water_pump(uint32_t timeout_sec);
 void turn_off_water_pump();
 
 /* Private defines -----------------------------------------------------------*/

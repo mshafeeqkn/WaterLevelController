@@ -25,7 +25,7 @@
 static uint8_t rep_count = 0;
 static uint8_t off_rep_count = 0;
 
-static void on_timer_2() {
+static void on_timer_2_tick(bool done) {
     if(0 == rep_count) {
         // Turn on at the beginning of count
         set_gpio_val(LED_DRY_RUN_PIN, 1);
@@ -50,7 +50,7 @@ void init_led_indicators() {
     init_50ms_timer_2();
 
     // Run timer 2 forever
-    run_timer_2(0, on_timer_2);
+    run_timer_2(0, on_timer_2_tick);
 }
 
 static void clear_water_level_indicator() {
