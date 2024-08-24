@@ -27,10 +27,19 @@
 #define DRY_RUN_THRESOLD_SEC        20
 
 static uint32_t seconds = 0;
+static uint32_t one_shot_pumping_time_sec = 120;
 
 void init_water_pump() {
     set_gpio_dir(PUMP_CONTROL_PIN, GPIO_OUTPUT);
     turn_off_water_pump();
+}
+
+void set_one_shot_pumping_time(uint32_t sec) {
+    one_shot_pumping_time_sec = sec;
+}
+
+uint32_t get_one_shot_pumping_time() {
+    return one_shot_pumping_time_sec;
 }
 
 static void on_timer_3_tick(bool done) {
