@@ -100,6 +100,14 @@ void set_rtc_time(uint32_t seconds) {
     while (!(RTC->CRL & RTC_CRL_RSF));
 }
 
+uint32_t get_rtc_time() {
+    // Clear the register sync flag and wait until this
+    // flag is set to get the fresh data.
+    RTC->CRL &= ~RTC_CRL_RSF;
+    while(!(RTC->CRL & RTC_CRL_RSF));
+    return ((RTC->CNTH << 16) | RTC->CNTL);
+}
+
 void set_rtc_alarm_time(uint32_t seconds) {
     // Wait until last write operations on RTC
     // registers has finished
