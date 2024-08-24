@@ -20,12 +20,12 @@
 #include <stdlib.h>
 #include "i2c.h"
 
-#define I2C_BUFF_SIZE   128
+#define I2C_BUFF_SIZE   8
 
 static i2c_callback_t i2c_cb = NULL;
 static uint8_t i2c_buff[I2C_BUFF_SIZE];
 static uint8_t i2c_buff_index;
-
+static i2c_mode_t i2c_mode = I2C_MODE_UNKNOWN;
 
 void I2C1_EV_IRQHandler() {
     if(I2C1->SR1 & I2C_SR1_ADDR) {
@@ -34,25 +34,44 @@ void I2C1_EV_IRQHandler() {
         (void)I2C1->SR1;
         (void)I2C1->SR2;
 
-        // reset buffer index
+        // Reset buffer index to 0
         i2c_buff_index = 0;
-    } else if(I2C1->SR1 & I2C_SR1_RXNE) {
-        // Store data until buffer is full
-        if(i2c_buff_index < I2C_BUFF_SIZE - 1) {
-            i2c_buff[i2c_buff_index++] = I2C1->DR;
+        if(I2C1->SR2 & I2C_SR2_TRA) {
+            // This is Tx mode
+            i2c_mode = I2C_MODE_TX;
+            i2c_cb(i2c_buff, I2C_BUFF_SIZE, i2c_mode);
+        } else {
+            // This is Rx mode
+            i2c_mode = I2C_MODE_RX;
         }
-    } else if(I2C1->SR1 & I2C_SR1_STOPF) {
-        // Clear the STOPF flag by reading SR1 and
-        // writing into CR1.
-        (void)I2C1->SR1;
-        I2C1->CR1 |= I2C_CR1_PE;
+    }
 
-        // Append the 0 as last byte
-        i2c_buff[i2c_buff_index] = 0;
+    if(I2C_MODE_RX == i2c_mode) {
+        if(I2C1->SR1 & I2C_SR1_RXNE) {
+            // Store data until buffer is full
+            if(i2c_buff_index < I2C_BUFF_SIZE) {
+                i2c_buff[i2c_buff_index++] = I2C1->DR;
+            }
+        } else if(I2C1->SR1 & I2C_SR1_STOPF) {
+            // Clear the STOPF flag by reading SR1 and
+            // writing into CR1.
+            (void)I2C1->SR1;
+            I2C1->CR1 |= I2C_CR1_PE;
 
-        // Call the registered callback function
-        if(NULL != i2c_cb) {
-            i2c_cb(i2c_buff, i2c_buff_index+1);
+            // Call the registered callback function
+            if(NULL != i2c_cb) {
+                i2c_cb(i2c_buff, i2c_buff_index, i2c_mode);
+            }
+            i2c_mode = I2C_MODE_UNKNOWN;
+        }
+    } else if(I2C_MODE_TX == i2c_mode) {
+        if(I2C1->SR1 & I2C_SR1_TXE) {
+            // place each byte in the DR
+            I2C1->DR = i2c_buff[i2c_buff_index++];
+        } else if (I2C1->SR1 & I2C_SR1_AF) {
+            // clear the NACK flag
+            I2C1->SR1 &= ~I2C_SR1_AF;
+            i2c_mode = I2C_MODE_UNKNOWN;
         }
     }
 }

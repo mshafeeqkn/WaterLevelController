@@ -34,7 +34,13 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-typedef void (*i2c_callback_t) (uint8_t *data, uint8_t len);
+typedef enum {
+    I2C_MODE_UNKNOWN,
+    I2C_MODE_RX,
+    I2C_MODE_TX
+} i2c_mode_t;
+
+typedef void (*i2c_callback_t) (uint8_t *data, uint8_t len, i2c_mode_t mode);
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 /* USER CODE END EC */
