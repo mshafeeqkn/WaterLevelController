@@ -31,12 +31,6 @@ extern "C" {
 #include "stm32f1xx.h"
 #include "common.h"
 
-typedef enum {
-    PUMP_RUN,
-    PUMP_DRY_RUN,
-    PUMP_OFF
-} pump_status_t;
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
