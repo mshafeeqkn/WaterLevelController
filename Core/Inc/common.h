@@ -42,6 +42,8 @@ extern "C" {
 
 #define     LED_DRY_RUN_PIN           GPIOB,5
 
+#define     PUMP_CONTROL_PIN          GPIOB,10
+
 #define     I2C_SLAVE_ADDRESS         0x28
 
 typedef enum {

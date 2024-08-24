@@ -41,6 +41,7 @@ Core/Src/system_stm32f1xx.c \
 Core/Src/sysmem.c \
 Core/Src/syscalls.c \
 Core/Src/pump_tank_monitor.c \
+Core/Src/pump_controller.c \
 Core/Src/led_indicator.c \
 Core/Src/config_mgr.c \
 Core/Src/timers.c \
