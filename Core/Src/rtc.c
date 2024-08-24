@@ -28,7 +28,7 @@ void RTC_Alarm_IRQHandler() {
     RTC->CRL &= ~RTC_CRL_ALRF;
 
     if(alarm_cb != NULL) {
-        return alarm_cb();
+        alarm_cb();
     }
 }
 
@@ -126,4 +126,12 @@ void set_rtc_alarm_time(uint32_t seconds) {
     // Wait until last write operations on RTC
     // registers has finished
     while (!(RTC->CRL & RTC_CRL_RSF));
+}
+
+uint32_t get_rtc_alarmtime() {
+    // Clear the register sync flag and wait until this
+    // flag is set to get the fresh data.
+    RTC->CRL &= ~RTC_CRL_RSF;
+    while(!(RTC->CRL & RTC_CRL_RSF));
+    return ((RTC->ALRH << 16) | RTC->ALRL);
 }

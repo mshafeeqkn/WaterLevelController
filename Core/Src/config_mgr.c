@@ -25,6 +25,7 @@
 #define  SET_RTC_TIME           0x10
 #define  GET_RTC_TIME           0x20
 #define  SET_PUMPING_TIME       0x30
+#define  GET_PUMPING_TIME       0x40
 
 static uint8_t cur_command = 0;
 
@@ -49,6 +50,15 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
         switch(cur_command) {
             case GET_RTC_TIME:
                 i2c_data = get_rtc_time();
+                i = 0;
+                while(i2c_data) {
+                    data[i++] = i2c_data & 0xFF;
+                    i2c_data >>= 8;
+                }
+                break;
+
+            case GET_PUMPING_TIME:
+                i2c_data = get_rtc_alarm_time();
                 i = 0;
                 while(i2c_data) {
                     data[i++] = i2c_data & 0xFF;
