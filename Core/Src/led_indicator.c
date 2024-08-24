@@ -47,7 +47,10 @@ void init_led_indicators() {
     set_gpio_dir(LED_LEVEL_20_PIN, GPIO_OUTPUT);
 
     set_gpio_dir(LED_DRY_RUN_PIN, GPIO_OUTPUT);
-    init_timer_2(50, on_timer_2);
+    init_50ms_timer_2();
+
+    // Run timer 2 forever
+    run_timer_2(0, on_timer_2);
 }
 
 static void clear_water_level_indicator() {
