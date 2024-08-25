@@ -30,8 +30,13 @@
 static uint32_t seconds = 0;
 static uint32_t one_shot_pumping_time_sec = 120;
 
+static void on_single_shot_btn_press() {
+    turn_on_water_pump(one_shot_pumping_time_sec);
+}
+
 void init_water_pump() {
     set_gpio_dir(PUMP_CONTROL_PIN, GPIO_OUTPUT);
+    enable_ext_intr(SINGLE_SHOT_PUMP_PIN, on_single_shot_btn_press);
     turn_off_water_pump();
 }
 

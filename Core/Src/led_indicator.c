@@ -79,7 +79,7 @@ void set_water_level(tank_level_t level) {
     }
 }
 
-void set_motor_status(pump_status_t status) {
+void set_pump_status(pump_status_t status) {
     if(PUMP_OFF == status) {
         set_timer_2_enable(false);
     } else {

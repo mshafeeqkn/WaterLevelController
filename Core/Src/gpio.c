@@ -19,6 +19,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
 
+static ext_intr_callback_t ext_intr_callback[5] = {0};
+
 void set_gpio_dir(stm_gpio_port_t port, uint8_t pin, stm_gpio_dir_t dir) {
     uint8_t         cr_bit_pos;
     uint8_t         reg_val;
@@ -82,4 +84,83 @@ uint8_t get_gpio_val(stm_gpio_port_t port, uint8_t pin) {
     // Return true if the corresponding bit in the GPIOx_IDR
     // bit is set.
     return ((port->IDR & (1 << pin)) != 0);
+}
+
+void EXTI0_IRQHandler() {
+    EXTI->PR |= EXTI_PR_PR0;
+    if(ext_intr_callback[0]) {
+        ext_intr_callback[0]();
+    }
+}
+
+void EXTI1_IRQHandler() {
+    EXTI->PR |= EXTI_PR_PR1;
+    if(ext_intr_callback[1]) {
+        ext_intr_callback[1]();
+    }
+}
+
+void EXTI2_IRQHandler() {
+    EXTI->PR |= EXTI_PR_PR2;
+    if(ext_intr_callback[2]) {
+        ext_intr_callback[2]();
+    }
+}
+
+void EXTI3_IRQHandler() {
+    EXTI->PR |= EXTI_PR_PR3;
+    if(ext_intr_callback[3]) {
+        ext_intr_callback[3]();
+    }
+}
+
+void EXTI4_IRQHandler() {
+    EXTI->PR |= EXTI_PR_PR4;
+    if(ext_intr_callback[4]) {
+        ext_intr_callback[4]();
+    }
+}
+
+void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, ext_intr_callback_t cb) {
+    uint8_t exticr_reg_conf = 0;
+    ext_intr_callback[pin] = cb;
+
+    // Configure the port as input with pull down resistor
+    set_gpio_dir(port, pin, GPIO_INPUT);
+    switch((uint32_t)port) {
+        case GPIOA_BASE:
+            exticr_reg_conf = 0;
+            break;
+
+        case GPIOB_BASE:
+            exticr_reg_conf = 1;
+            break;
+
+        case GPIOC_BASE:
+            exticr_reg_conf = 2;
+            break;
+
+        default:
+            return;
+    }
+
+    // Tie the given pin to the given interrupt line
+    AFIO->EXTICR[pin/4] |= exticr_reg_conf << ((pin % 4) * 4);
+
+    // Trigger on falling edge
+    EXTI->RTSR |= (1 << pin);
+
+    // Interrupt masking
+    EXTI->IMR |= (1 << pin);
+
+    // Clear the interrupt flag
+    EXTI->PR |= (1 << pin);
+
+    // Enable interrupt
+    // TODO: handle the interrupt line above 4 as it use
+    // same IRQ number
+    IRQn_Type irq_num = EXTI0_IRQn + pin;
+    uint32_t prioritygroup = NVIC_GetPriorityGrouping();
+    NVIC_SetPriority(irq_num, NVIC_EncodePriority(prioritygroup, 10, 0));
+    NVIC_EnableIRQ(irq_num);
 }
