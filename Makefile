@@ -47,6 +47,7 @@ Core/Src/config_mgr.c \
 Core/Src/timers.c \
 Core/Src/i2c.c \
 Core/Src/rtc.c \
+Core/Src/adc.c \
 Core/Src/gpio.c
 
 # ASM sources
