@@ -18,35 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
-// Macro defines
-#define TURN_ON_LED()            turn_led_on(TURN_ON)
-#define TURN_OFF_LED()           turn_led_on(TURN_OFF)
-#define TOGGLE_LED()             turn_led_on(TURN_TOGGLE)
-
-/**
- * Enumerations
- */
-typedef enum {
-    TURN_OFF,
-    TURN_ON,
-    TURN_TOGGLE
-} LedState_t;
-
-/**
- * @brief Trun the built in LED on/off/toggle
- *
- * @param state - TURN_ON / TURN_OFF / TURN_TOGGLE
- */
-void turn_led_on(LedState_t state) {
-    if(state == TURN_TOGGLE){
-        GPIOC->ODR ^= GPIO_ODR_ODR13;
-    } else if(state == TURN_ON) {
-        GPIOC->ODR &= ~(GPIO_ODR_ODR13);
-    } else {
-        GPIOC->ODR |= GPIO_ODR_ODR13;
-    }
-}
+#include "pump_tank_monitor.h"
+#include "pump_controller.h"
+#include "led_indicator.h"
+#include "config_mgr.h"
+#include "voltage_monitor.h"
 
 /**
  * @brief Configure the system clock as 8MHz using
@@ -72,17 +48,12 @@ void config_sys_clock() {
 int main(void) {
     config_sys_clock();
 
-    // Enable clock for GPIOC peripheral
-    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
-
-    // Configure GPIO pin as output
-    GPIOC->CRH &= ~(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);  // Clear configuration
-    GPIOC->CRH |= GPIO_CRH_MODE13_0;  // Set pin mode to general purpose output (max speed 10 MHz)
+    init_tank_pump_monitor();
+    init_water_pump();
+    init_led_indicators();
+    init_config_mgr();
+    init_voltage_monitor();
 
     while(1) {
-        // Wait until the overflow flag is set.
-        while( (TIM1->SR & TIM_SR_UIF) == 0) {}
-        TIM1->SR &= ~(TIM_SR_UIF);
-        TOGGLE_LED();
     }
 }
