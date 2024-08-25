@@ -41,6 +41,7 @@ typedef enum {
 } stm_gpio_dir_t;
 
 typedef GPIO_TypeDef*   stm_gpio_port_t;
+typedef void (*ext_intr_callback_t)();
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
@@ -54,6 +55,7 @@ typedef GPIO_TypeDef*   stm_gpio_port_t;
 void set_gpio_dir(stm_gpio_port_t port, uint8_t pin, stm_gpio_dir_t dir);
 void set_gpio_val(stm_gpio_port_t port, uint8_t pin, uint8_t val);
 uint8_t get_gpio_val(stm_gpio_port_t port, uint8_t pin);
+void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, ext_intr_callback_t cb);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

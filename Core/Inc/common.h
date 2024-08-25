@@ -43,6 +43,7 @@ extern "C" {
 #define     LED_DRY_RUN_PIN           GPIOB,5
 
 #define     PUMP_CONTROL_PIN          GPIOB,10
+#define     SINGLE_SHOT_PUMP_PIN      GPIOB,0
 
 #define     I2C_SLAVE_ADDRESS         0x28
 
