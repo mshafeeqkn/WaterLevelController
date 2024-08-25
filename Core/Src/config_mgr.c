@@ -21,6 +21,7 @@
 #include "i2c.h"
 #include "rtc.h"
 #include "pump_controller.h"
+#include "voltage_monitor.h"
 #include "common.h"
 
 #define  SET_RTC_TIME           0x10
@@ -30,6 +31,7 @@
 #define  GET_RTC_TIME           0x80
 #define  GET_PUMPING_TIME       0x90
 #define  GET_PUMP_RUN_TIME      0xA0
+#define  GET_LINE_VOLTAGE       0xB0
 
 static uint8_t cur_command = 0;
 
@@ -67,6 +69,10 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
 
             case GET_PUMP_RUN_TIME:
                 i2c_data = get_one_shot_pumping_time();
+                break;
+
+            case GET_LINE_VOLTAGE:
+                i2c_data = get_current_voltage();
                 break;
         }
 
