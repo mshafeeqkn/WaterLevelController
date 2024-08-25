@@ -44,6 +44,7 @@ Core/Src/pump_tank_monitor.c \
 Core/Src/pump_controller.c \
 Core/Src/led_indicator.c \
 Core/Src/config_mgr.c \
+Core/Src/voltage_monitor.c \
 Core/Src/timers.c \
 Core/Src/i2c.c \
 Core/Src/rtc.c \

@@ -1,9 +1,10 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : adc.h
-  * @brief          : Header for adc.c file.
-  *                   This file contains the defines of the ADC driver functions.
+  * @file           : pump_controller.h
+  * @brief          : Header for pump_controller.c file.
+  *                   This file contains the defines of function to drive the
+  *                   water pump
   ******************************************************************************
   * @attention
   *
@@ -19,8 +20,8 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __ADC_H
-#define __ADC_H
+#ifndef __VOLTAGE_MONITOR_H
+#define __VOLTAGE_MONITOR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,13 +29,13 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx.h"
+#include "common.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
-
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 /* USER CODE END EC */
@@ -44,9 +45,8 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void init_adc_module();
-void enable_adc_channel(uint8_t chan);
-uint16_t get_adc_value(uint8_t chan);
+void init_voltage_monitor();
+uint16_t get_current_voltage();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
@@ -56,4 +56,4 @@ uint16_t get_adc_value(uint8_t chan);
 }
 #endif
 
-#endif /* __I2C_H */
+#endif /* __VOLTAGE_MONITOR_H */

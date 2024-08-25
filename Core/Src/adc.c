@@ -23,6 +23,7 @@
 
 static uint8_t num_adc = 0;
 static uint16_t adc_data_buff[MAX_NUM_ADC_CHANNELS] = {0};
+static uint8_t adc_chan_num[MAX_NUM_ADC_CHANNELS] = {0};
 
 void inacurate_delay(uint32_t ms) {
     for (volatile uint32_t i = 0; i < ms * 1000; ++i) {
@@ -92,6 +93,7 @@ void init_adc_module() {
 void enable_adc_channel(uint8_t chan) {
     // chan - 0 based numbering
     num_adc++;
+    adc_chan_num[num_adc-1] = chan;
 
     // Set the number of channels to be converted
     ADC1->SQR1 &= ~ADC_SQR1_L;
@@ -110,4 +112,15 @@ void enable_adc_channel(uint8_t chan) {
     } else {
         ADC1->SQR2 |= (chan + 1) << (num_adc - 1);
     }
+}
+
+uint16_t get_adc_value(uint8_t chan) {
+    uint8_t i;
+
+    for(i = 0; i < MAX_NUM_ADC_CHANNELS; i++) {
+        if(adc_chan_num[i] == chan) {
+            return adc_data_buff[i];
+        }
+    }
+    return 0;
 }
