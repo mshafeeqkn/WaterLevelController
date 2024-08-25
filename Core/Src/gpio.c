@@ -45,7 +45,7 @@ void set_gpio_dir(stm_gpio_port_t port, uint8_t pin, stm_gpio_dir_t dir) {
     }
 
     // Calculate the MSB position of pin number
-    cr_bit_pos = (pin * 4) - 1;
+    cr_bit_pos = (pin * 4);
 
     // Get the register name which is to be used to
     // set the GPIO as input or output
