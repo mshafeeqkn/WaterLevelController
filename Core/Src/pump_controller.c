@@ -22,6 +22,7 @@
 #include "gpio.h"
 #include "timers.h"
 #include "led_indicator.h"
+#include "pump_tank_monitor.h"
 #include "common.h"
 
 #define DRY_RUN_THRESOLD_SEC        20
@@ -46,10 +47,9 @@ static void on_timer_3_tick(bool done) {
     uint8_t water_inflow;
 
     seconds++;
-    water_inflow = get_gpio_val(PUMP_DRY_RUN_PIN);
+    water_inflow = is_water_pumping();
 
     if(!water_inflow && seconds > DRY_RUN_THRESOLD_SEC) {
-        set_gpio_val(PUMP_DRY_RUN_PIN, 0);
         set_pump_status(PUMP_DRY_RUN);
         set_timer_3_enable(false);
     }

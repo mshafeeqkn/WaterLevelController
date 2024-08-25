@@ -30,7 +30,7 @@ void init_tank_pump_monitor() {
     set_gpio_dir(WATER_LEVEL_20_PIN, GPIO_INPUT);
 
     // Configure dry run detection pin as input
-    set_gpio_dir(PUMP_DRY_RUN_PIN, GPIO_INPUT);
+    set_gpio_dir(WATER_INFLOW_PIN, GPIO_INPUT);
 }
 
 tank_level_t get_tank_water_level() {
@@ -57,6 +57,6 @@ tank_level_t get_tank_water_level() {
     return TANK_LEVEL_0;
 }
 
-bool is_pump_running_dry() {
-    return get_gpio_val(PUMP_DRY_RUN_PIN);
+bool is_water_pumping() {
+    return get_gpio_val(WATER_INFLOW_PIN);
 }

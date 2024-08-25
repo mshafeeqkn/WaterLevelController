@@ -32,7 +32,7 @@ extern "C" {
 #define     WATER_LEVEL_40_PIN        GPIOB,14
 #define     WATER_LEVEL_20_PIN        GPIOB,13
 
-#define     PUMP_DRY_RUN_PIN          GPIOB,12
+#define     WATER_INFLOW_PIN          GPIOB,12
 
 #define     LED_LEVEL_100_PIN         GPIOA,0
 #define     LED_LEVEL_80_PIN          GPIOA,1

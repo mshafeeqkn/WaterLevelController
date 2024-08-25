@@ -47,7 +47,7 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void init_tank_pump_monitor();
 tank_level_t get_tank_water_level();
-bool is_pump_running_dry();
+bool is_water_pumping();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

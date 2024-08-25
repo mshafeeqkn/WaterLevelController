@@ -20,6 +20,7 @@
 #include "config_mgr.h"
 #include "i2c.h"
 #include "rtc.h"
+#include "pump_controller.h"
 #include "common.h"
 
 #define  SET_RTC_TIME           0x10
@@ -33,7 +34,7 @@
 static uint8_t cur_command = 0;
 
 static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
-    uint32_t i2c_data;
+    uint32_t i2c_data = 0;
     uint8_t i;
 
     if(I2C_MODE_RX == mode) {
