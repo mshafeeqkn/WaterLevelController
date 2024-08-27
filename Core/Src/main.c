@@ -25,6 +25,7 @@
 #include "config_mgr.h"
 #include "voltage_monitor.h"
 #endif
+#include "gpio.h"
 
 
 #ifdef DEBUG_LED_ENABLED
@@ -51,13 +52,15 @@ void turn_led_on(LedState_t state) {
     }
 }
 void set_error() {
-    TURN_OFF_LED();
+    TURN_ON_LED();
 }
 
 #endif // DEBUG_LED_ENABLED
 
 
 void SysTick_Handler() {
+    tank_level_t level = get_tank_water_level();
+    set_water_level(level);
 }
 
 /**
@@ -105,13 +108,8 @@ int main(void) {
 
     __disable_irq();
     config_sys_clock();
-    init_tank_pump_monitor();
-#if 0
     init_led_indicators();
-    init_water_pump();
-    init_config_mgr();
-    init_voltage_monitor();
-#endif
+    init_tank_pump_monitor();
     init_systick_timer();
     __enable_irq();
 

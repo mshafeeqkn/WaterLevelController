@@ -36,11 +36,11 @@ extern "C" {
 
 #define     LED_LEVEL_100_PIN         GPIOA,0
 #define     LED_LEVEL_80_PIN          GPIOA,1
-#define     LED_LEVEL_60_PIN          GPIOB,2
-#define     LED_LEVEL_40_PIN          GPIOB,3
-#define     LED_LEVEL_20_PIN          GPIOB,4
+#define     LED_LEVEL_60_PIN          GPIOA,2
+#define     LED_LEVEL_40_PIN          GPIOA,3
+#define     LED_LEVEL_20_PIN          GPIOA,4
 
-#define     LED_DRY_RUN_PIN           GPIOB,5
+#define     LED_DRY_RUN_PIN           GPIOA,5
 
 #define     PUMP_CONTROL_PIN          GPIOB,10
 #define     SINGLE_SHOT_PUMP_PIN      GPIOB,0
