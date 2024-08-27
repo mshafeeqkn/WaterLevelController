@@ -125,25 +125,25 @@ void TIM3_IRQHandler() {
     }
 }
 
-void run_timer_3(uint32_t tick_50ms, timer_callback_t callback) {
+void run_timer_3(uint32_t tick_1s, timer_callback_t callback) {
     // Set the callback function for timer3
     timer3_cb = callback;
-    timer3_rep_count = tick_50ms;
+    timer3_rep_count = tick_1s;
 
     // Start timer
     set_timer_3_enable(true);
 }
 
-void init_50ms_timer_3() {
+void init_1s_timer_3() {
     // Enable system clock to TIM3
     RCC->APB2ENR |= RCC_APB1ENR_TIM3EN;
 
-    // Set pre-scalar 8000; so each count will take
+    // Set pre-scalar 40000; so each count will take
     // 1ms delay since we are using 8MHz clock
-    TIM3->PSC = 7999;
+    TIM3->PSC = 39999;
 
-    // Count 0 - 49 (both inclusive - so total 50)
-    TIM3->ARR = 49;
+    // Count 0 - 199 (both inclusive - so total 200)
+    TIM3->ARR = 199;
 
     // Clear the counter register as 0
     TIM3->CNT = 0;
