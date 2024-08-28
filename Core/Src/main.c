@@ -20,12 +20,11 @@
 #include "main.h"
 #include "pump_tank_monitor.h"
 #include "led_indicator.h"
-#if 0
 #include "pump_controller.h"
+#if 0
 #include "config_mgr.h"
 #include "voltage_monitor.h"
 #endif
-#include "gpio.h"
 
 
 #ifdef DEBUG_LED_ENABLED
@@ -61,6 +60,13 @@ void set_error() {
 void SysTick_Handler() {
     tank_level_t level = get_tank_water_level();
     set_water_level(level);
+    if(level < TANK_LEVEL_40) {
+        turn_on_water_pump(0);
+    }
+
+    if(level == TANK_LEVEL_100) {
+        turn_off_water_pump();
+    }
 }
 
 /**
@@ -110,6 +116,7 @@ int main(void) {
     config_sys_clock();
     init_led_indicators();
     init_tank_pump_monitor();
+    init_water_pump();
     init_systick_timer();
     __enable_irq();
 

@@ -68,7 +68,7 @@ void run_timer_2(uint32_t tick_50ms, timer_callback_t callback) {
 
 void init_50ms_timer_2() {
     // Enable system clock to TIM2
-    RCC->APB2ENR |= RCC_APB1ENR_TIM2EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 
     // Set pre-scalar 8000; so each count will take
     // 1ms delay since we are using 8MHz clock
@@ -136,7 +136,7 @@ void run_timer_3(uint32_t tick_1s, timer_callback_t callback) {
 
 void init_1s_timer_3() {
     // Enable system clock to TIM3
-    RCC->APB2ENR |= RCC_APB1ENR_TIM3EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
     // Set pre-scalar 40000; so each count will take
     // 1ms delay since we are using 8MHz clock

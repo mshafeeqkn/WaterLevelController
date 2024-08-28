@@ -21,7 +21,6 @@
 
 static ext_intr_callback_t ext_intr_callback[5] = {0};
 
-void set_error();
 void set_gpio_dir(stm_gpio_port_t port, uint8_t pin, stm_gpio_dir_t dir) {
     uint8_t         cr_bit_pos;
     uint8_t         reg_val;
