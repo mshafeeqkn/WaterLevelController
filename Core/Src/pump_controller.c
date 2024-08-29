@@ -27,7 +27,6 @@
 
 #define DRY_RUN_THRESOLD_SEC        20
 
-static uint32_t seconds = 0;
 static uint32_t one_shot_pumping_time_sec = 120;
 
 static void on_single_shot_btn_press() {
@@ -52,15 +51,23 @@ uint32_t get_one_shot_pumping_time() {
     return one_shot_pumping_time_sec;
 }
 
-static void on_timer_3_tick(bool done) {
-    uint8_t water_inflow;
+static void on_pumping_tick(bool done) {
+    static uint8_t dry_run_sec = 0;
+    static uint32_t seconds = 0;
 
     seconds++;
-    water_inflow = is_water_pumping();
+    if(is_water_pumping()) {
+        dry_run_sec = 0;
+    } else {
+        dry_run_sec++;
+    }
 
-    if(!water_inflow && seconds > DRY_RUN_THRESOLD_SEC) {
-        set_pump_status(PUMP_DRY_RUN);
+    if(dry_run_sec > DRY_RUN_THRESOLD_SEC) {
         set_timer_3_enable(false);
+        set_gpio_val(PUMP_CONTROL_PIN, 0);
+        set_pump_status(PUMP_DRY_RUN);
+        seconds = 0;
+        dry_run_sec = 0;
     }
 
     if(done) {
@@ -70,8 +77,11 @@ static void on_timer_3_tick(bool done) {
 }
 
 void turn_on_water_pump(uint32_t timeout_sec) {
+    if(PUMP_DRY_RUN == get_pump_status())
+        return;
+
     set_gpio_val(PUMP_CONTROL_PIN, 1);
-    run_timer_3(timeout_sec, on_timer_3_tick);
+    run_timer_3(timeout_sec, on_pumping_tick);
     set_pump_status(PUMP_RUN);
 }
 

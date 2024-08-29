@@ -22,8 +22,12 @@
 #include "gpio.h"
 #include "timers.h"
 
-static uint8_t rep_count = 0;
-static uint8_t off_rep_count = 0;
+#define DRY_RUN_HOLD_TIME   20
+
+static volatile uint8_t rep_count = 0;
+static volatile uint8_t off_rep_count = 0;
+static volatile pump_status_t pump_status = PUMP_OFF;
+static volatile uint8_t dry_pump_hold_time = DRY_RUN_HOLD_TIME;
 
 static void on_timer_2_tick(bool done) {
     if(0 == rep_count) {
@@ -34,8 +38,15 @@ static void on_timer_2_tick(bool done) {
         set_gpio_val(LED_DRY_RUN_PIN, 0);
     }
     rep_count++;
-    if(rep_count > 7) {
+    if(rep_count > 30) {
         rep_count = 0;
+    }
+
+    if(get_pump_status() == PUMP_DRY_RUN) {
+        dry_pump_hold_time--;
+        if(dry_pump_hold_time == 0) {
+            set_pump_status(PUMP_OFF);
+        }
     }
 }
 
@@ -49,8 +60,9 @@ void init_led_indicators() {
     set_gpio_dir(LED_DRY_RUN_PIN, GPIO_OUTPUT);
     init_50ms_timer_2();
 
-    // Run timer 2 forever
+    // Run timer 2 forever and set status LED as off
     run_timer_2(0, on_timer_2_tick);
+    set_pump_status(PUMP_OFF);
 }
 
 static void clear_water_level_indicator() {
@@ -79,7 +91,12 @@ void set_water_level(tank_level_t level) {
     }
 }
 
+pump_status_t get_pump_status() {
+    return pump_status;
+}
+
 void set_pump_status(pump_status_t status) {
+    pump_status = status;
     if(PUMP_OFF == status) {
         set_timer_2_enable(false);
     } else {
@@ -87,7 +104,7 @@ void set_pump_status(pump_status_t status) {
         if(PUMP_RUN == status) {
             off_rep_count = 1;
         } else {
-            off_rep_count = 4;
+            off_rep_count = 15;
         }
     }
 }
