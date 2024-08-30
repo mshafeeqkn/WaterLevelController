@@ -22,6 +22,7 @@
 #include "led_indicator.h"
 #include "pump_controller.h"
 #include "uart.h"
+#include "rtc.h"
 #if 0
 #include "config_mgr.h"
 #include "voltage_monitor.h"
@@ -109,7 +110,12 @@ void delay(uint32_t ms) {
     }
 }
 
+static void on_alarm() {
+    set_error();
+}
+
 int main(void) {
+    uint32_t date, alarm;
 #ifdef DEBUG_LED_ENABLED
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
@@ -122,6 +128,9 @@ int main(void) {
     __disable_irq();
     config_sys_clock();
     uart1_setup(UART_TX_ENABLE);
+    init_rtc(on_alarm);
+    set_rtc_time(1240);
+    set_rtc_alarm_time(1245);
     init_led_indicators();
     init_tank_pump_monitor();
     init_water_pump();
@@ -129,7 +138,9 @@ int main(void) {
     __enable_irq();
 
     while(1) {
-        uart1_send_string("Sample string\r\n");
+        date = get_rtc_time();
+        alarm = get_rtc_alarm_time();
+        uart1_send_string("Date: %u - %u - %u\r", date, alarm, (RTC->CRL & RTC_CRL_ALRF));
         delay(1);
     }
 }

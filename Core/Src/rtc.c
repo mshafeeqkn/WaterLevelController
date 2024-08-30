@@ -24,8 +24,9 @@
 static alarm_callback_t alarm_cb = NULL;
 
 void RTC_Alarm_IRQHandler() {
-    // Clear alarm flag
+    // Clear alarm flag and external interrupt flag
     RTC->CRL &= ~RTC_CRL_ALRF;
+    EXTI->PR |= EXTI_PR_PR17;
 
     if(alarm_cb != NULL) {
         alarm_cb();
@@ -40,6 +41,9 @@ void init_rtc(alarm_callback_t callback) {
     RCC->APB1ENR |= RCC_APB1ENR_BKPEN;
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
+    // Disable write protection for the backup domain
+    PWR->CR |= PWR_CR_DBP;
+
     // Reset the backup domian
     RCC->BDCR |= RCC_BDCR_BDRST;
     RCC->BDCR &= ~RCC_BDCR_BDRST;
@@ -49,10 +53,10 @@ void init_rtc(alarm_callback_t callback) {
     while(!(RCC->BDCR & RCC_BDCR_LSERDY));
 
     // Select LSE as RTC clock source
-    RCC->BDCR |= RCC_BDCR_RTCSEL_0;
+    RCC->BDCR |= RCC_BDCR_RTCSEL_LSE;
 
-    // Disable write protection for the backup domain
-    PWR->CR |= PWR_CR_DBP;
+    // Finally, enable the RTC
+    RCC->BDCR |= RCC_BDCR_RTCEN;
 
     // Wait for the write to be completed if any
     while (!(RTC->CRL & RTC_CRL_RTOFF));
@@ -71,13 +75,17 @@ void init_rtc(alarm_callback_t callback) {
 
     // Enable alarm interrupt, low priority
     RTC->CRH |= RTC_CRH_ALRIE;
-    uint32_t prioritygroup = NVIC_GetPriorityGrouping();
-    uint32_t alarm_priority = NVIC_EncodePriority(prioritygroup, 10, 0);
-    NVIC_SetPriority(RTC_Alarm_IRQn, alarm_priority);
-    NVIC_EnableIRQ(RTC_Alarm_IRQn);
 
-    // Finally, enable the RTC
-    RCC->BDCR |= RCC_BDCR_RTCEN;
+    // In STM32 microcontrollers, EXTI Line 17 is dedicated to
+    // the RTC alarm event. The EXTI (External Interrupt/Event
+    // Controller) allows external lines or internal peripheral
+    // events (like the RTC alarm) to generate interrupts or
+    // events that the processor can handle.
+    EXTI->IMR |= EXTI_IMR_MR17;
+    EXTI->EMR &= ~EXTI_EMR_MR17;
+    EXTI->RTSR |= EXTI_RTSR_TR17;
+    NVIC_SetPriority(RTC_Alarm_IRQn, 0);
+    NVIC_EnableIRQ(RTC_Alarm_IRQn);
 }
 
 void set_rtc_time(uint32_t seconds) {
@@ -111,7 +119,8 @@ uint32_t get_rtc_time() {
 void set_rtc_alarm_time(uint32_t seconds) {
     // Wait until last write operations on RTC
     // registers has finished
-    while (!(RTC->CRL & RTC_CRL_RSF));
+    // while (!(RTC->CRL & RTC_CRL_RSF));
+    while (!(RTC->CRL & RTC_CRL_RTOFF));
 
     // Enter RTC in configuration mode
     RTC->CRL |= RTC_CRL_CNF;
@@ -125,10 +134,12 @@ void set_rtc_alarm_time(uint32_t seconds) {
 
     // Wait until last write operations on RTC
     // registers has finished
-    while (!(RTC->CRL & RTC_CRL_RSF));
+    // while (!(RTC->CRL & RTC_CRL_RSF));
+    while (!(RTC->CRL & RTC_CRL_RTOFF));
+
 }
 
-uint32_t get_rtc_alarmtime() {
+uint32_t get_rtc_alarm_time() {
     // Clear the register sync flag and wait until this
     // flag is set to get the fresh data.
     RTC->CRL &= ~RTC_CRL_RSF;
