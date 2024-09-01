@@ -85,7 +85,46 @@ void delay(uint32_t ms) {
     }
 }
 
-volatile uint16_t ADC_Buffer[2500];
+#define     NUM_INPUT_VOLT_SAMPLE        40
+
+static void timer_1_500us_cc1() {
+    // Enable system clock to TIM1
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+
+    // Set PA8 as alternate function output push-pull
+    GPIOA->CRH &= ~(GPIO_CRH_MODE8|GPIO_CRH_CNF8);
+    GPIOA->CRH |= GPIO_CRH_MODE8_0;
+    GPIOA->CRH |= GPIO_CRH_CNF8_1;
+
+    // Set pre-scalar 8; so each count will take
+    // 1us delay since we are using 8MHz clock
+    TIM1->PSC = 7999;
+
+    // Count 0 - 499 (both inclusive - so total 500)
+    TIM1->ARR = 499;
+
+    // Clear the counter register as 0
+    TIM1->CNT = 0;
+
+    // Clear the counter reset flag and enable
+    // the update interrupt which will trigger
+    // on the counter reset.
+    TIM1->SR &= ~(TIM_SR_UIF);
+    TIM1->DIER |= TIM_DIER_UIE;
+    TIM1->CCR1 = 499;
+    TIM1->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0);
+
+    // Capture compare enable
+    TIM1->CCER |= TIM_CCER_CC1E;
+
+    // Enable PA8 (OC) if corresponding OCxE is set in the CCER register
+    TIM1->BDTR |= TIM_BDTR_MOE;
+
+    TIM1->CR1 |= TIM_CR1_CEN;
+}
+
+volatile uint16_t ADC_Buffer[NUM_INPUT_VOLT_SAMPLE];
 
 void ADC_DMA_Init(void) {
     // 1. Enable the clock for ADC1 and DMA1
@@ -97,21 +136,19 @@ void ADC_DMA_Init(void) {
     ADC1->SQR3 = 6; // Channel 6 as the 1st conversion in regular sequence
 
     // 3. Configure ADC1 CR2 register
-    ADC1->CR2 |= ADC_CR2_CONT;   // Continuous conversion mode
-    ADC1->CR2 |= ADC_CR2_DMA;    // Enable DMA mode
-    ADC1->CR2 |= ADC_CR2_ADON;   // Enable ADC
-    ADC1->CR2 |= ADC_CR2_EXTTRIG;// Start conversion on external trigger
-    ADC1->CR2 |= ADC_CR2_EXTSEL; // The external trigger is SWSTART
+    // ADC1->CR2 |= ADC_CR2_CONT;    // Continuous conversion mode
+    ADC1->CR2 |= ADC_CR2_DMA;     // Enable DMA mode
+    ADC1->CR2 |= ADC_CR2_ADON;    // Enable ADC
+    ADC1->CR2 |= ADC_CR2_EXTTRIG; // Start conversion on external trigger
+    ADC1->CR2 &= ~ADC_CR2_EXTSEL; // The external trigger is TIM1 CC1
 
     // 4. Configure DMA1 Channel 1 for ADC1
-    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;     // Peripheral address (ADC data register)
-    DMA1_Channel1->CMAR = (uint32_t)ADC_Buffer;    // Memory address (ADC_Buffer)
-    DMA1_Channel1->CNDTR = 2500;                    // Number of data to transfer (100 samples)
-    DMA1_Channel1->CCR |= DMA_CCR_MINC;            // Memory increment mode
-    // DMA1_Channel1->CCR |= DMA_CCR_PSIZE_16BITS;    // Peripheral size 16-bits
-    DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;
-    // DMA1_Channel1->CCR |= DMA_CCR_MSIZE_16BITS;    // Memory size 16-bits
-	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;
+    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;      // Peripheral address (ADC data register)
+    DMA1_Channel1->CMAR = (uint32_t)ADC_Buffer;     // Memory address (ADC_Buffer)
+    DMA1_Channel1->CNDTR = NUM_INPUT_VOLT_SAMPLE;   // Number of data to transfer (100 samples)
+    DMA1_Channel1->CCR |= DMA_CCR_MINC;             // Memory increment mode
+    DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;          // Peripheral size 16-bits
+	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;          // Memory size 16-bits
     // DMA1_Channel1->CCR |= DMA_CCR_CIRC;            // Enable circular mode
     DMA1_Channel1->CCR |= DMA_CCR_EN;              // Enable DMA Channel 1
 
@@ -128,18 +165,21 @@ int main(void) {
     GPIOC->CRH |= GPIO_CRH_MODE13_0;
     TURN_OFF_LED();
 #endif
-
     __disable_irq();
     config_sys_clock();
+    timer_1_500us_cc1();
     uart1_setup(UART_TX_ENABLE);
     ADC_DMA_Init();
     __enable_irq();
 
     while (1) {
+        while(DMA1_Channel1->CNDTR)
+            uart1_send_string("%u\r\n", DMA1_Channel1->CNDTR);
+
         if(DMA1->ISR & DMA_ISR_TCIF1) {
             DMA1->IFCR |= DMA_ISR_TCIF1;
-            for(uint16_t i = 0; i < 2500; i++) {
-            uart1_send_string("%u %u\r\n", i, ADC_Buffer[i]);
+            for(uint16_t i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
+                uart1_send_string("%u %u\r\n", i, ADC_Buffer[i]);
             }
             uart1_send_string("\r\n");
         }
