@@ -18,9 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "pump_tank_monitor.h"
-#include "led_indicator.h"
-#include "pump_controller.h"
 #include "uart.h"
 #include "rtc.h"
 #if 0
@@ -58,17 +55,6 @@ void set_error() {
 
 #endif // DEBUG_LED_ENABLED
 
-void SysTick_Handler() {
-    tank_level_t level = get_tank_water_level();
-    set_water_level(level);
-    if(level < TANK_LEVEL_40) {
-        turn_on_water_pump(0);
-    }
-
-    if(level == TANK_LEVEL_100) {
-        turn_off_water_pump();
-    }
-}
 /**
  * @brief Configure the system clock as 8MHz using
  * external crystal oscillator.
@@ -86,17 +72,6 @@ static void config_sys_clock() {
     while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSE);
 }
 
-static void init_systick_timer() {
-    // Clock AHB/8, enable interrupt
-    SysTick->CTRL |= (1 << SysTick_CTRL_TICKINT_Pos);
-    SysTick->LOAD = 500000-1;
-    SysTick->VAL = 0;
-    SysTick->CALIB;
-
-    // Enable the counter
-    SysTick->CTRL |= (1 << SysTick_CTRL_ENABLE_Pos);
-}
-
 /**
   * @brief  The application entry point.
   * @retval int
@@ -110,12 +85,41 @@ void delay(uint32_t ms) {
     }
 }
 
-static void on_alarm() {
-    set_error();
+volatile uint16_t ADC_Buffer[2500];
+
+void ADC_DMA_Init(void) {
+    // 1. Enable the clock for ADC1 and DMA1
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;  // ADC1 clock enable
+    RCC->AHBENR  |= RCC_AHBENR_DMA1EN;   // DMA1 clock enable
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+
+    // 2. Configure the ADC
+    ADC1->SQR3 = 6; // Channel 6 as the 1st conversion in regular sequence
+
+    // 3. Configure ADC1 CR2 register
+    ADC1->CR2 |= ADC_CR2_CONT;   // Continuous conversion mode
+    ADC1->CR2 |= ADC_CR2_DMA;    // Enable DMA mode
+    ADC1->CR2 |= ADC_CR2_ADON;   // Enable ADC
+    ADC1->CR2 |= ADC_CR2_EXTTRIG;// Start conversion on external trigger
+    ADC1->CR2 |= ADC_CR2_EXTSEL; // The external trigger is SWSTART
+
+    // 4. Configure DMA1 Channel 1 for ADC1
+    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;     // Peripheral address (ADC data register)
+    DMA1_Channel1->CMAR = (uint32_t)ADC_Buffer;    // Memory address (ADC_Buffer)
+    DMA1_Channel1->CNDTR = 2500;                    // Number of data to transfer (100 samples)
+    DMA1_Channel1->CCR |= DMA_CCR_MINC;            // Memory increment mode
+    // DMA1_Channel1->CCR |= DMA_CCR_PSIZE_16BITS;    // Peripheral size 16-bits
+    DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;
+    // DMA1_Channel1->CCR |= DMA_CCR_MSIZE_16BITS;    // Memory size 16-bits
+	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;
+    // DMA1_Channel1->CCR |= DMA_CCR_CIRC;            // Enable circular mode
+    DMA1_Channel1->CCR |= DMA_CCR_EN;              // Enable DMA Channel 1
+
+    // 5. Start ADC conversion
+    ADC1->CR2 |= ADC_CR2_SWSTART; // Start conversion of regular channels
 }
 
 int main(void) {
-    uint32_t date, alarm;
 #ifdef DEBUG_LED_ENABLED
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
@@ -128,19 +132,16 @@ int main(void) {
     __disable_irq();
     config_sys_clock();
     uart1_setup(UART_TX_ENABLE);
-    init_rtc(on_alarm);
-    set_rtc_time(1240);
-    set_rtc_alarm_time(1245);
-    init_led_indicators();
-    init_tank_pump_monitor();
-    init_water_pump();
-    init_systick_timer();
+    ADC_DMA_Init();
     __enable_irq();
 
-    while(1) {
-        date = get_rtc_time();
-        alarm = get_rtc_alarm_time();
-        uart1_send_string("Date: %u - %u - %u\r", date, alarm, (RTC->CRL & RTC_CRL_ALRF));
-        delay(1);
+    while (1) {
+        if(DMA1->ISR & DMA_ISR_TCIF1) {
+            DMA1->IFCR |= DMA_ISR_TCIF1;
+            for(uint16_t i = 0; i < 2500; i++) {
+            uart1_send_string("%u %u\r\n", i, ADC_Buffer[i]);
+            }
+            uart1_send_string("\r\n");
+        }
     }
 }
