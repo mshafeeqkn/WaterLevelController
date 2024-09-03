@@ -36,7 +36,6 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-Core/Src/adc.c \
 Core/Src/config_mgr.c \
 Core/Src/gpio.c \
 Core/Src/led_indicator.c \
@@ -102,7 +101,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DSTM32F103x6 \
--DDEBUG_LED_ENABLED
+-DDEBUG_ENABLED
 
 # AS includes
 AS_INCLUDES =

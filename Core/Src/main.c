@@ -18,18 +18,18 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "uart.h"
+#include "rtc.h"
 #include "pump_tank_monitor.h"
 #include "led_indicator.h"
 #include "pump_controller.h"
-#include "uart.h"
-#include "rtc.h"
+#include "voltage_monitor.h"
 #if 0
 #include "config_mgr.h"
-#include "voltage_monitor.h"
 #endif
 
 
-#ifdef DEBUG_LED_ENABLED
+#ifdef DEBUG_ENABLED
 
 #define TURN_ON_LED()            turn_led_on(TURN_ON)
 #define TURN_OFF_LED()           turn_led_on(TURN_OFF)
@@ -56,7 +56,7 @@ void set_error() {
     TURN_ON_LED();
 }
 
-#endif // DEBUG_LED_ENABLED
+#endif // DEBUG_ENABLED
 
 void SysTick_Handler() {
     tank_level_t level = get_tank_water_level();
@@ -116,7 +116,7 @@ static void on_alarm() {
 
 int main(void) {
     uint32_t date, alarm;
-#ifdef DEBUG_LED_ENABLED
+#ifdef DEBUG_ENABLED
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
     // Configure PC13 pin as output push-pull maximum speed 10MHz
@@ -134,13 +134,12 @@ int main(void) {
     init_led_indicators();
     init_tank_pump_monitor();
     init_water_pump();
+    init_voltage_monitor();
     init_systick_timer();
     __enable_irq();
 
     while(1) {
-        date = get_rtc_time();
-        alarm = get_rtc_alarm_time();
-        uart1_send_string("Date: %u - %u - %u\r", date, alarm, (RTC->CRL & RTC_CRL_ALRF));
+        uart1_send_string("Current voltage: %u\r\n", get_current_voltage(10));
         delay(1);
     }
 }
