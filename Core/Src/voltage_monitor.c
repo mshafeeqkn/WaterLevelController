@@ -18,26 +18,147 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include <stdbool.h>
-#include "adc.h"
+#include <stdio.h>
+#include <math.h>
 #include "voltage_monitor.h"
+#include "uart.h"
 
-#define  VOLT_METER_CHAN            6
-#define  VOLT_METER_PRESET_CHAN     7
+#define     NUM_INPUT_VOLT_SAMPLE        100
+volatile uint16_t ADC_Buffer[NUM_INPUT_VOLT_SAMPLE];
+
+static void timer_1_500us_cc1() {
+    // Enable system clock to TIM1
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+
+    // Set pre-scalar 8; so each count will take
+    // 1us delay since we are using 8MHz clock
+    TIM1->PSC = 7;
+
+    // Count 0 - 499 (both inclusive - so total 500)
+    TIM1->ARR = 499;
+
+    // Clear the counter register as 0
+    TIM1->CNT = 0;
+
+    // Clear the counter reset flag and enable
+    // the update interrupt which will trigger
+    // on the counter reset.
+    TIM1->SR &= ~(TIM_SR_UIF);
+    TIM1->DIER |= TIM_DIER_UIE;
+    TIM1->CCR1 = 499;
+    TIM1->CCMR1 |= (TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0);
+
+    // Capture compare enable
+    TIM1->CCER |= TIM_CCER_CC1E;
+
+    // Enable PA8 (OC) if corresponding OCxE is set in the CCER register
+    TIM1->BDTR |= TIM_BDTR_MOE;
+
+    TIM1->CR1 |= TIM_CR1_CEN;
+}
+
 
 void init_voltage_monitor() {
-    enable_adc_channel(VOLT_METER_CHAN);
-    enable_adc_channel(VOLT_METER_PRESET_CHAN);
-    init_adc_module();
+    timer_1_500us_cc1();
+
+    // 1. Enable the clock for ADC1 and DMA1
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;  // ADC1 clock enable
+    RCC->AHBENR  |= RCC_AHBENR_DMA1EN;   // DMA1 clock enable
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+
+    // 2. Configure the ADC
+    ADC1->SQR3 = 6; // Channel 6 as the 1st conversion in regular sequence
+
+    // 3. Configure ADC1 CR2 register
+    // ADC1->CR2 |= ADC_CR2_CONT;    // Continuous conversion mode
+    ADC1->CR2 |= ADC_CR2_DMA;     // Enable DMA mode
+    ADC1->CR2 |= ADC_CR2_ADON;    // Enable ADC
+    ADC1->CR2 |= ADC_CR2_EXTTRIG; // Start conversion on external trigger
+    ADC1->CR2 &= ~ADC_CR2_EXTSEL; // The external trigger is TIM1 CC1
+
+    // 4. Configure DMA1 Channel 1 for ADC1
+    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;      // Peripheral address (ADC data register)
+    DMA1_Channel1->CMAR = (uint32_t)ADC_Buffer;     // Memory address (ADC_Buffer)
+    DMA1_Channel1->CNDTR = NUM_INPUT_VOLT_SAMPLE;   // Number of data to transfer (100 samples)
+    DMA1_Channel1->CCR |= DMA_CCR_MINC;             // Memory increment mode
+    DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;          // Peripheral size 16-bits
+	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;          // Memory size 16-bits
+    // DMA1_Channel1->CCR |= DMA_CCR_CIRC;            // Enable circular mode
+    DMA1_Channel1->CCR |= DMA_CCR_EN;              // Enable DMA Channel 1
+
+    // 5. Start ADC conversion
+    ADC1->CR2 |= ADC_CR2_SWSTART; // Start conversion of regular channels
 }
 
-static uint16_t get_adc_volt_meter_val() {
-    return get_adc_value(VOLT_METER_CHAN);
+static void start_adc_conversion(uint8_t count) {
+    DMA1_Channel1->CCR &= ~DMA_CCR_EN;              // Enable DMA Channel 1
+    DMA1_Channel1->CNDTR = count;                   // Number of data to transfer (100 samples)
+    DMA1_Channel1->CCR |= DMA_CCR_EN;               // Enable DMA Channel 1
 }
 
-static uint16_t get_adc_preset_val() {
-    return get_adc_value(VOLT_METER_PRESET_CHAN);
+#if DEBUG_ENABLED
+void double2str(double value, char* str, int precision) {
+    // Handle the sign
+    if (value < 0) {
+        *str++ = '-';
+        value = -value;
+    }
+
+    // Extract integer part
+    // the int_part should be long long; but here we used
+    // long as a work around.
+    long int_part = (long)value;
+    double frac_part = value - int_part;
+
+    // Convert integer part to string
+    sprintf(str, "%ld", int_part);
+
+    // Move the pointer to the end of the integer part
+    while (*str != '\0') {
+        str++;
+    }
+
+    // Add the decimal point
+    *str++ = '.';
+
+    // Handle the fractional part
+    for (int i = 0; i < precision; i++) {
+        frac_part *= 10;
+        int digit = (int)frac_part;
+        *str++ = '0' + digit;
+        frac_part -= digit;
+    }
+
+    // Null-terminate the string
+    *str = '\0';
 }
+#endif
 
 uint16_t get_current_voltage() {
-    return get_adc_volt_meter_val()/get_adc_preset_val();
+    uint16_t ret = 0;
+    if(DMA1->ISR & DMA_ISR_TCIF1) {
+        DMA1->IFCR |= DMA_ISR_TCIF1;
+        uint32_t sum = 0;
+        int16_t ac_voltage;
+        uint32_t sq_sum = 0;
+        for(uint16_t i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
+            sum += ADC_Buffer[i];
+        }
+        uint16_t zero_point = sum / NUM_INPUT_VOLT_SAMPLE;
+        for(uint16_t i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
+            ac_voltage = ADC_Buffer[i] - zero_point;
+            sq_sum += (ac_voltage * ac_voltage);
+        }
+
+        double reading_voltage = sqrt(sq_sum/NUM_INPUT_VOLT_SAMPLE) * 3.3 * 700.0 / 4095.0;
+#ifdef DEBUG_ENABLED
+        char buff[16];
+        double2str(reading_voltage, buff, 7);
+        uart1_send_string("voltage = %u\r\n", (uint16_t)reading_voltage);
+#endif
+        start_adc_conversion(NUM_INPUT_VOLT_SAMPLE);
+        ret = (uint16_t)reading_voltage;
+    }
+
+    return ret;
 }
