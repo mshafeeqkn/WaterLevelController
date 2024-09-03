@@ -18,14 +18,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "uart.h"
+#include "rtc.h"
 #include "pump_tank_monitor.h"
 #include "led_indicator.h"
 #include "pump_controller.h"
-#include "uart.h"
-#include "rtc.h"
+#include "voltage_monitor.h"
 #if 0
 #include "config_mgr.h"
-#include "voltage_monitor.h"
 #endif
 
 
@@ -134,13 +134,12 @@ int main(void) {
     init_led_indicators();
     init_tank_pump_monitor();
     init_water_pump();
+    init_voltage_monitor();
     init_systick_timer();
     __enable_irq();
 
     while(1) {
-        date = get_rtc_time();
-        alarm = get_rtc_alarm_time();
-        uart1_send_string("Date: %u - %u - %u\r", date, alarm, (RTC->CRL & RTC_CRL_ALRF));
+        uart1_send_string("Current voltage: %u\r\n", get_current_voltage(10));
         delay(1);
     }
 }

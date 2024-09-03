@@ -72,7 +72,7 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
                 break;
 
             case GET_LINE_VOLTAGE:
-                i2c_data = get_current_voltage();
+                i2c_data = get_current_voltage(5);
                 break;
         }
 

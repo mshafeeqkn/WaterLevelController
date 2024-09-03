@@ -24,7 +24,11 @@
 #include "uart.h"
 
 #define     NUM_INPUT_VOLT_SAMPLE        100
-volatile uint16_t ADC_Buffer[NUM_INPUT_VOLT_SAMPLE];
+#define     VREF_VOLT                    3.3
+#define     ADC_RESOLUTION               4095.0
+#define     MULTIPLIER                   700.0
+
+volatile uint16_t adc_buff[NUM_INPUT_VOLT_SAMPLE];
 
 static void timer_1_500us_cc1() {
     // Enable system clock to TIM1
@@ -53,8 +57,6 @@ static void timer_1_500us_cc1() {
 
     // Enable PA8 (OC) if corresponding OCxE is set in the CCER register
     TIM1->BDTR |= TIM_BDTR_MOE;
-
-    TIM1->CR1 |= TIM_CR1_CEN;
 }
 
 
@@ -78,8 +80,8 @@ void init_voltage_monitor() {
 
     // 4. Configure DMA1 Channel 1 for ADC1
     DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;      // Peripheral address (ADC data register)
-    DMA1_Channel1->CMAR = (uint32_t)ADC_Buffer;     // Memory address (ADC_Buffer)
-    DMA1_Channel1->CNDTR = NUM_INPUT_VOLT_SAMPLE;   // Number of data to transfer (100 samples)
+    DMA1_Channel1->CMAR = (uint32_t)adc_buff;     // Memory address (adc_buff)
+    // DMA1_Channel1->CNDTR = NUM_INPUT_VOLT_SAMPLE;   // Number of data to transfer (100 samples)
     DMA1_Channel1->CCR |= DMA_CCR_MINC;             // Memory increment mode
     DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;          // Peripheral size 16-bits
 	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;          // Memory size 16-bits
@@ -96,7 +98,7 @@ static void start_adc_conversion(uint8_t count) {
     DMA1_Channel1->CCR |= DMA_CCR_EN;               // Enable DMA Channel 1
 }
 
-#if DEBUG_ENABLED
+#if DEBUG_ENABLED // TODO: should be moved from here
 void double2str(double value, char* str, int precision) {
     // Handle the sign
     if (value < 0) {
@@ -134,31 +136,73 @@ void double2str(double value, char* str, int precision) {
 }
 #endif
 
-uint16_t get_current_voltage() {
-    uint16_t ret = 0;
-    if(DMA1->ISR & DMA_ISR_TCIF1) {
-        DMA1->IFCR |= DMA_ISR_TCIF1;
-        uint32_t sum = 0;
-        int16_t ac_voltage;
-        uint32_t sq_sum = 0;
-        for(uint16_t i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
-            sum += ADC_Buffer[i];
-        }
-        uint16_t zero_point = sum / NUM_INPUT_VOLT_SAMPLE;
-        for(uint16_t i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
-            ac_voltage = ADC_Buffer[i] - zero_point;
-            sq_sum += (ac_voltage * ac_voltage);
-        }
-
-        double reading_voltage = sqrt(sq_sum/NUM_INPUT_VOLT_SAMPLE) * 3.3 * 700.0 / 4095.0;
+uint16_t get_current_voltage(uint8_t repeat) {
+    uint16_t i, j = 0;
+    uint32_t sum;
+    uint32_t sq_sum;
+    int16_t ac_voltage;
+    uint16_t zero_point;
+    double reading_voltage;
+    double volt_sum = 0;
 #ifdef DEBUG_ENABLED
-        char buff[16];
-        double2str(reading_voltage, buff, 7);
-        uart1_send_string("voltage = %u\r\n", (uint16_t)reading_voltage);
+    // char buff[16];
 #endif
-        start_adc_conversion(NUM_INPUT_VOLT_SAMPLE);
-        ret = (uint16_t)reading_voltage;
-    }
 
-    return ret;
+    if(0 == repeat)
+        return 0;
+
+    // Start timer 500us timer to covnert the ADC in every 500uS
+    // See the timer_1_500us_cc1 function for the initialization
+    TIM1->CR1 |= TIM_CR1_CEN;
+    // Enable the DMA to transfer 'NUM_INPUT_VOLT_SAMPLE' converted
+    // data into the memory
+    start_adc_conversion(NUM_INPUT_VOLT_SAMPLE);
+
+    while(1) {
+
+        // When NUM_INPUT_VOLT_SAMPLE conversions are done the TCIF1
+        // flag will be set int the DMA1_ISR
+        if(DMA1->ISR & DMA_ISR_TCIF1) {
+            DMA1->IFCR |= DMA_ISR_TCIF1;
+
+            // Calculate the DC value (zero point) from which the AC
+            // is oscillating
+            sum = 0;
+            sq_sum = 0;
+            for(i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
+                sum += adc_buff[i];
+            }
+            zero_point = sum / NUM_INPUT_VOLT_SAMPLE;
+
+            // Calculate the RMS value of the AC voltage
+            // take the square of each sample taken in 500us delay
+            // and devide it with maxium sample. Then convert it to
+            // actual ADC voltage
+            for(i = 0; i < NUM_INPUT_VOLT_SAMPLE; i++) {
+                ac_voltage = adc_buff[i] - zero_point;
+                sq_sum += (ac_voltage * ac_voltage);
+            }
+
+            reading_voltage = sqrt(sq_sum/NUM_INPUT_VOLT_SAMPLE) * VREF_VOLT * MULTIPLIER / ADC_RESOLUTION;
+#ifdef DEBUG_ENABLED
+            char buff[16];
+            double2str(reading_voltage, buff, 7);
+            uart1_send_string("voltage = %u - %s\r\n", (uint16_t)reading_voltage, buff);
+#endif
+            // Try as many times as requested and take the avarage to 
+            // get the actual line voltage
+            volt_sum += reading_voltage;
+
+            if(repeat > ++j) {
+                start_adc_conversion(NUM_INPUT_VOLT_SAMPLE);
+            } else {
+                break;
+            }
+
+        }
+    }
+#ifdef DEBUG_ENABLED
+    uart1_send_string("Average voltage = %u\r\n", (uint16_t)(volt_sum/repeat));
+#endif
+    return (uint16_t)(volt_sum/repeat);
 }

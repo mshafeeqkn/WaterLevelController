@@ -46,7 +46,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void init_voltage_monitor();
-uint16_t get_current_voltage();
+uint16_t get_current_voltage(uint8_t repeat);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
