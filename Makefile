@@ -92,7 +92,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DSTM32F103x6 \
--DDEBUG_LED_ENABLED
+-DDEBUG_ENABLED
 
 # AS includes
 AS_INCLUDES =
