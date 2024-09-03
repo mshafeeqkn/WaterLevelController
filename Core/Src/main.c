@@ -24,9 +24,7 @@
 #include "led_indicator.h"
 #include "pump_controller.h"
 #include "voltage_monitor.h"
-#if 0
 #include "config_mgr.h"
-#endif
 
 
 #ifdef DEBUG_ENABLED
@@ -110,12 +108,7 @@ void delay(uint32_t ms) {
     }
 }
 
-static void on_alarm() {
-    set_error();
-}
-
 int main(void) {
-    uint32_t date, alarm;
 #ifdef DEBUG_ENABLED
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
@@ -128,9 +121,7 @@ int main(void) {
     __disable_irq();
     config_sys_clock();
     uart1_setup(UART_TX_ENABLE);
-    init_rtc(on_alarm);
-    set_rtc_time(1240);
-    set_rtc_alarm_time(1245);
+    init_config_mgr();
     init_led_indicators();
     init_tank_pump_monitor();
     init_water_pump();
@@ -139,7 +130,6 @@ int main(void) {
     __enable_irq();
 
     while(1) {
-        uart1_send_string("Current voltage: %u\r\n", get_current_voltage(10));
         delay(1);
     }
 }
