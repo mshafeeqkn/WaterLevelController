@@ -5,11 +5,11 @@
 #include <linux/uaccess.h>
 #include <linux/i2c.h>
 
-#define DEVICE_NAME     "stm32f103_dev"
-#define CLASS_NAME      "stm32f103_class"
+#define DEVICE_NAME     "wlc"
+#define CLASS_NAME      "wlc_class"
 #define STATIC_MAJOR    64
 #define MESSAGE_LEN     24
-#define STM32_I2C_ADDR  0x14
+#define STM32_I2C_ADDR  0x28
 
 
 static int              major_num;
@@ -20,8 +20,9 @@ static struct device*           char_device = NULL;
 static struct i2c_adapter*      stm_adapter = NULL;
 static struct i2c_client*       stm_client = NULL;
 
-
 static uint8_t stm_data[2] = {0};
+
+#if 0
 
 #define     STM_OFF_TIME        _IOW('i', 0, uint8_t)
 #define     STM_ON_TIME         _IOW('i', 1, uint8_t)
@@ -31,13 +32,78 @@ static uint8_t stm_data[2] = {0};
 
 #define     ON_INDEX            0
 #define     OFF_INDEX           1
+#endif
+
+#define     IOCTL_SET_RTC_TIME          _IOW('i', 0, uint32_t)
+#define     IOCTL_SET_PUMPING_TIME      _IOW('i', 1, uint8_t)
+#define     IOCTL_SET_PUMP_RUN_TIME     _IOW('i', 2, uint8_t)
+
+#define     IOCTL_GET_RTC_TIME          _IOR('i', 3, uint8_t*)
+#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 4, uint8_t*)
+#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 5, uint8_t*)
+#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 6, uint8_t*)
+
+#define     SET_RTC_TIME            0x10
+#define     SET_PUMPING_TIME        0x20
+#define     SET_PUMP_RUN_TIME       0x30
+
+#define     GET_RTC_TIME            0x80
+#define     GET_PUMPING_TIME        0x90
+#define     GET_PUMP_RUN_TIME       0xA0
+#define     GET_LINE_VOLTAGE        0xB0
 
 static struct i2c_board_info stm_board_info = {
     I2C_BOARD_INFO(DEVICE_NAME, STM32_I2C_ADDR),
 };
 
+static void serialize_data(uint8_t cmd, uint32_t data, uint8_t serial_data[]) {
+    serial_data[0] = cmd;
+    *(uint32_t*)(ser_data+1) = data;
+}
+
+static void send_i2c_time(long unsigned int arg, uint8_t cmd) {
+    uint32_t tim;
+    uint8_t serial_data[8];
+
+    if (copy_from_user(&tim, (uint32_t __user *)arg, 4)) {
+        return -EFAULT;
+    }
+
+    serialize_data(cmd, tim, serial_data);
+    ret = i2c_master_send(stm_client, serial_data, 5);
+    if(ret < 0) {
+        return -EFAULT;
+    }
+
+    pr_info("Sending time command: %02X%02X%02X%02X%02X\n",
+	    serial_data[0], serial_data[1], serial_data[2],
+	    serial_data[4], serial_data[5]);
+}
+
 static long int stm_ioctl(struct file *f, unsigned int cmd,  long unsigned int arg) {
     int ret;
+
+    switch(cmd) {
+        case IOCTL_SET_RTC_TIME:
+            send_i2c_time(arg, SET_RTC_TIME);
+            break;
+        case IOCTL_SET_PUMPING_TIME:
+            send_i2c_time(arg, SET_PUMPING_TIME);
+            break;
+        case IOCTL_SET_PUMP_RUN_TIME:
+            send_i2c_time(arg, SET_PUMP_RUN_TIME);
+            break;
+
+        case IOCTL_GET_RTC_TIME:
+            break;
+        case IOCTL_GET_PUMPING_TIME:
+            break;
+        case IOCTL_GET_PUMP_RUN_TIME:
+            break;
+        case IOCTL_GET_LINE_VOLTAGE:
+            break;
+    }
+#if 0
     uint8_t data[16];
 
     switch(cmd) {
@@ -80,6 +146,7 @@ static long int stm_ioctl(struct file *f, unsigned int cmd,  long unsigned int a
         default:
             break;
     }
+#endif
     return 0;
 }
 
