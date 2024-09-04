@@ -1,0 +1,9 @@
+app/app
+*.cmd
+*.ko
+*.o
+*.o.d
+*.symvers
+*.order
+*.mod
+*.mod.c
