@@ -90,8 +90,8 @@ static void on_rtc_alarm() {
 }
 
 void init_config_mgr() {
-    init_rtc(on_rtc_alarm);
     i2c_slave_init(I2C_SLAVE_ADDRESS, on_i2c_event);
-    set_rtc_time(1240);
-    set_rtc_alarm_time(1245);
+    // init_rtc(on_rtc_alarm);
+    // set_rtc_time(1240);
+    // set_rtc_alarm_time(1245);
 }
