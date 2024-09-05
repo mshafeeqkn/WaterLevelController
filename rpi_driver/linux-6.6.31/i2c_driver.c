@@ -20,28 +20,14 @@ static struct device*           char_device = NULL;
 static struct i2c_adapter*      stm_adapter = NULL;
 static struct i2c_client*       stm_client = NULL;
 
-static uint8_t stm_data[2] = {0};
-
-#if 0
-
-#define     STM_OFF_TIME        _IOW('i', 0, uint8_t)
-#define     STM_ON_TIME         _IOW('i', 1, uint8_t)
-#define     STM_START_BLINK     _IO ('i', 3)
-#define     STM_GET_TIME        _IOR('i', 4, uint8_t*)
-#define     STM_GET_DATA        _IOR('i', 5, uint8_t*)
-
-#define     ON_INDEX            0
-#define     OFF_INDEX           1
-#endif
-
 #define     IOCTL_SET_RTC_TIME          _IOW('i', 0, uint32_t)
-#define     IOCTL_SET_PUMPING_TIME      _IOW('i', 1, uint8_t)
-#define     IOCTL_SET_PUMP_RUN_TIME     _IOW('i', 2, uint8_t)
+#define     IOCTL_SET_PUMPING_TIME      _IOW('i', 1, uint32_t)
+#define     IOCTL_SET_PUMP_RUN_TIME     _IOW('i', 2, uint32_t)
 
-#define     IOCTL_GET_RTC_TIME          _IOR('i', 3, uint8_t*)
-#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 4, uint8_t*)
-#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 5, uint8_t*)
-#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 6, uint8_t*)
+#define     IOCTL_GET_RTC_TIME          _IOR('i', 3, uint32_t*)
+#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 4, uint32_t*)
+#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 5, uint32_t*)
+#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 6, uint32_t*)
 
 #define     SET_RTC_TIME            0x10
 #define     SET_PUMPING_TIME        0x20
@@ -58,96 +44,78 @@ static struct i2c_board_info stm_board_info = {
 
 static void serialize_data(uint8_t cmd, uint32_t data, uint8_t serial_data[]) {
     serial_data[0] = cmd;
-    *(uint32_t*)(ser_data+1) = data;
+    *(uint32_t*)(serial_data+1) = data;
 }
 
-static void send_i2c_time(long unsigned int arg, uint8_t cmd) {
+static long int send_i2c_time(long unsigned int arg, uint8_t cmd) {
     uint32_t tim;
     uint8_t serial_data[8];
+    long int ret = 0;
 
     if (copy_from_user(&tim, (uint32_t __user *)arg, 4)) {
         return -EFAULT;
     }
 
     serialize_data(cmd, tim, serial_data);
+
+    pr_info("Sending time command: %02X%02X%02X%02X%02X\n",
+	    serial_data[0], serial_data[1], serial_data[2],
+	    serial_data[3], serial_data[4]);
+
     ret = i2c_master_send(stm_client, serial_data, 5);
     if(ret < 0) {
         return -EFAULT;
     }
 
-    pr_info("Sending time command: %02X%02X%02X%02X%02X\n",
-	    serial_data[0], serial_data[1], serial_data[2],
-	    serial_data[4], serial_data[5]);
+    return ret;
+}
+
+static long int get_i2c_time(long unsigned int arg, uint8_t cmd) {
+    long int ret;
+    uint32_t data;
+
+    pr_info("Get command: %02X\n", cmd);
+    if ((ret = i2c_master_send(stm_client, &cmd, 1)) < 0) {
+        return ret;
+    }
+
+    if((ret = i2c_master_recv(stm_client, (uint8_t*)&data, 4)) < 0) {
+        return ret;
+    }
+
+    pr_info("Rx data: %08X\n", data);
+    if(copy_to_user((uint8_t __user*)arg, &data, 4)) {
+        return -EFAULT;
+    }
+    return 0;
 }
 
 static long int stm_ioctl(struct file *f, unsigned int cmd,  long unsigned int arg) {
-    int ret;
+    long int ret = 0;
 
     switch(cmd) {
         case IOCTL_SET_RTC_TIME:
-            send_i2c_time(arg, SET_RTC_TIME);
+            ret = send_i2c_time(arg, SET_RTC_TIME);
             break;
         case IOCTL_SET_PUMPING_TIME:
-            send_i2c_time(arg, SET_PUMPING_TIME);
+            ret = send_i2c_time(arg, SET_PUMPING_TIME);
             break;
         case IOCTL_SET_PUMP_RUN_TIME:
-            send_i2c_time(arg, SET_PUMP_RUN_TIME);
+            ret = send_i2c_time(arg, SET_PUMP_RUN_TIME);
             break;
 
         case IOCTL_GET_RTC_TIME:
+            ret = get_i2c_time(arg, GET_RTC_TIME);
             break;
         case IOCTL_GET_PUMPING_TIME:
+            ret = get_i2c_time(arg, GET_PUMPING_TIME);
             break;
         case IOCTL_GET_PUMP_RUN_TIME:
             break;
         case IOCTL_GET_LINE_VOLTAGE:
             break;
     }
-#if 0
-    uint8_t data[16];
-
-    switch(cmd) {
-        case STM_OFF_TIME:
-            if (copy_from_user(&stm_data[OFF_INDEX], (uint8_t __user *)arg, 1)) {
-			    return -EFAULT;
-            }
-            break;
-
-        case STM_ON_TIME:
-            if (copy_from_user(&stm_data[ON_INDEX], (uint8_t __user *)arg, 1)) {
-			    return -EFAULT;
-            }
-            break;
-
-        case STM_START_BLINK:
-            ret = i2c_master_send(stm_client, stm_data, 2);
-            if(ret < 0) {
-                return -EFAULT;
-            }
-            pr_info("Sending data to STM: on: %d; off: %d\n",
-                stm_data[ON_INDEX], stm_data[OFF_INDEX]);
-            break;
-
-        case STM_GET_DATA:
-            ret = i2c_master_recv(stm_client, data, 2);
-            if(ret < 0) {
-                return -EFAULT;
-            }
-            if(copy_to_user((uint8_t __user*)arg, data, 2)) {
-                return -EFAULT;
-            }
-            break;
-
-        case STM_GET_TIME:
-            if(copy_to_user((uint8_t __user*)arg, stm_data, 2)) {
-                return -EFAULT;
-            }
-
-        default:
-            break;
-    }
-#endif
-    return 0;
+    return ret;
 }
 
 static struct file_operations fops = {
@@ -214,6 +182,7 @@ static int __init simple_drv_readtest_init(void) {
 
     i2c_put_adapter(stm_adapter);
     pr_info("Success..!!!! Device driver created successfully\n");
+
     return 0;
 }
 

@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#include "uart.h"
+
 #define     WATER_LEVEL_100_PIN       GPIOA,8
 #define     WATER_LEVEL_80_PIN        GPIOB,15
 #define     WATER_LEVEL_60_PIN        GPIOB,14

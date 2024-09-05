@@ -44,6 +44,7 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
         if(cur_command <= 0x7F) {
             i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
         }
+        uart1_send_string("I2C command: %02X: data: %u\r\n", cur_command, i2c_data);
         switch(cur_command) {
             case SET_RTC_TIME:
                 set_rtc_time(i2c_data);
