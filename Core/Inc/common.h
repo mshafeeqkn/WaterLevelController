@@ -32,7 +32,7 @@ extern "C" {
 #define     WATER_LEVEL_40_PIN        GPIOB,13
 #define     WATER_LEVEL_20_PIN        GPIOB,12
 
-#define     WATER_INFLOW_PIN          GPIOB,10
+#define     WATER_INFLOW_PIN          GPIOB,11
 
 #define     LED_LEVEL_100_PIN         GPIOA,0
 #define     LED_LEVEL_80_PIN          GPIOA,1
@@ -42,7 +42,7 @@ extern "C" {
 
 #define     LED_DRY_RUN_PIN           GPIOA,5
 
-#define     PUMP_CONTROL_PIN          GPIOB,11
+#define     PUMP_CONTROL_PIN          GPIOB,10
 #define     SINGLE_SHOT_PUMP_PIN      GPIOB,0
 
 #define     I2C_SLAVE_ADDRESS         0x28

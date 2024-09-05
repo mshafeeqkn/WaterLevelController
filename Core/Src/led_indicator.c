@@ -39,13 +39,15 @@ static void on_timer_2_tick(bool done) {
     }
     rep_count++;
     if(rep_count > 30) {
+        // This case execute in every 30 * timer 2 tick = 1.5sec
         rep_count = 0;
-    }
-
-    if(get_pump_status() == PUMP_DRY_RUN) {
         dry_pump_hold_time--;
-        if(dry_pump_hold_time == 0) {
-            set_pump_status(PUMP_OFF);
+
+        if(get_pump_status() == PUMP_DRY_RUN) {
+            if(dry_pump_hold_time == 0) {
+                set_pump_status(PUMP_OFF);
+                dry_pump_hold_time = DRY_RUN_HOLD_TIME;
+            }
         }
     }
 }
