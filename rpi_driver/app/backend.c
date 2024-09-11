@@ -6,6 +6,7 @@
 extern uint8_t          run_app;
 extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
+extern uint32_t         pc_time;
 extern uint32_t         pumping_time;
 extern uint16_t         voltage;
 extern uint16_t         pump_run_sec;
@@ -15,6 +16,7 @@ void* thread_backend(void *arg) {
     while (run_app) {
         pthread_mutex_lock(&app_mutex);
         sys_time++;
+        pc_time++;
         pthread_mutex_unlock(&app_mutex);
         sleep(1);
     }

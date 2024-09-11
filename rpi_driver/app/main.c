@@ -9,6 +9,7 @@
 uint8_t          run_app = 1;
 pthread_mutex_t  app_mutex;
 uint32_t         sys_time;
+uint32_t         pc_time;
 uint32_t         pumping_time;
 uint16_t         voltage;
 uint16_t         pump_run_sec;
@@ -25,7 +26,7 @@ extern int stm_load_system_time(uint32_t *sys_time);
 
 void print_log(const char *format, ...) {
 #ifdef DEBUG_APP
-    FILE *file = fopen("/dev/pts/1", "a"); // Open the file in append mode
+    FILE *file = fopen("/dev/pts/0", "a"); // Open the file in append mode
     if (file == NULL) {
         perror("Failed to open file");
         return;
@@ -53,6 +54,18 @@ static int load_stm_data() {
 int main() {
     pthread_t gui_thread;
     int ret;
+    time_t tmp_time = time(NULL);
+
+    // Convert the current time to local time representation
+    struct tm *local_time = localtime(&tmp_time);
+    if (local_time == NULL) {
+        perror("localtime");
+        return -1;
+    }
+
+    pc_time = local_time->tm_sec +
+        (local_time->tm_min * 60) +
+        (local_time->tm_hour * 3600);
 
     ret = load_stm_data();
     if(ret < 0) {

@@ -7,6 +7,7 @@ pthread_t user_input_thread;
 extern uint8_t          run_app;
 extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
+extern uint32_t         pc_time;
 extern uint32_t         pumping_time;
 extern uint16_t         voltage;
 extern uint16_t         pump_run_sec;
@@ -48,20 +49,7 @@ void set_pumping_time() {
 }
 
 void sync_system_clock() {
-    time_t tmp_time = time(NULL);
-
-    // Convert the current time to local time representation
-    struct tm *local_time = localtime(&tmp_time);
-    if (local_time == NULL) {
-        perror("localtime");
-        return;
-    }
-
-    sys_time = local_time->tm_sec +
-        (local_time->tm_min * 60) +
-        (local_time->tm_hour * 3600);
-
-    print_log("Set the RTC time: %08X\n", sys_time);
+    sys_time = pc_time;
     stm_set_system_time(sys_time);
 }
 
