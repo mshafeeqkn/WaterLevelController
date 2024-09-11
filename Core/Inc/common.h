@@ -26,13 +26,15 @@
 extern "C" {
 #endif
 
-#define     WATER_LEVEL_100_PIN       GPIOB,9
-#define     WATER_LEVEL_80_PIN        GPIOB,8
-#define     WATER_LEVEL_60_PIN        GPIOB,7
-#define     WATER_LEVEL_40_PIN        GPIOB,6
-#define     WATER_LEVEL_20_PIN        GPIOB,5
+#include "uart.h"
 
-#define     WATER_INFLOW_PIN          GPIOB,4
+#define     WATER_LEVEL_100_PIN       GPIOA,8
+#define     WATER_LEVEL_80_PIN        GPIOB,15
+#define     WATER_LEVEL_60_PIN        GPIOB,14
+#define     WATER_LEVEL_40_PIN        GPIOB,13
+#define     WATER_LEVEL_20_PIN        GPIOB,12
+
+#define     WATER_INFLOW_PIN          GPIOB,11
 
 #define     LED_LEVEL_100_PIN         GPIOA,0
 #define     LED_LEVEL_80_PIN          GPIOA,1

@@ -83,7 +83,7 @@ void i2c_slave_init(uint8_t addr, i2c_callback_t callback) {
     // Enable clock for port B, I2C and alternate funciton IO
     RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
     RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
-    RCC->APB2ENR |= RCC_APB1ENR_I2C1EN;
+    RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;
 
     // Configure the I2C pins as open-drain output
     GPIOB->CRL |= (GPIO_CRL_CNF6 | GPIO_CRL_MODE6_0);
