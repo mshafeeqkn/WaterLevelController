@@ -68,7 +68,6 @@ static void on_pumping_tick(bool done) {
         set_pump_status(PUMP_DRY_RUN);
         seconds = 0;
         dry_run_sec = 0;
-        uart1_send_string("Pump status: Dry Run\r\n");
     }
 
     if(done) {

@@ -47,7 +47,6 @@ static void on_timer_2_tick(bool done) {
             if(dry_pump_hold_time == 0) {
                 set_pump_status(PUMP_OFF);
                 dry_pump_hold_time = DRY_RUN_HOLD_TIME;
-                uart1_send_string("Pump status: OFF\r\n");
             }
         }
     }
