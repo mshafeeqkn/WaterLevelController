@@ -109,6 +109,7 @@ void delay(uint32_t ms) {
 }
 
 int main(void) {
+    __disable_irq();
 #ifdef DEBUG_ENABLED
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
@@ -118,7 +119,6 @@ int main(void) {
     TURN_OFF_LED();
 #endif
 
-    __disable_irq();
     config_sys_clock();
     uart1_setup(UART_TX_ENABLE);
     init_config_mgr();
