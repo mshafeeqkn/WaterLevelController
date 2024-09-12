@@ -77,13 +77,11 @@ void I2C1_EV_IRQHandler() {
         if(I2C1->SR1 & I2C_SR1_BERR) {
             // Clear if any bus error
             I2C1->SR1 &= ~I2C_SR1_BERR;
-            uart1_send_string("Bus Error cleared\r\n");
         } else if(I2C1->SR1 & I2C_SR1_STOPF) {
             // Clear the STOPF flag by reading SR1 and
             // writing into CR1.
             (void)I2C1->SR1;
             I2C1->CR1 |= I2C_CR1_PE;
-            uart1_send_string("Stop bit error cleared\r\n");
         }
     }
 }
