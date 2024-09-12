@@ -72,7 +72,7 @@ static long int send_i2c_time(long unsigned int arg, uint8_t cmd) {
 
 static long int get_i2c_time(long unsigned int arg, uint8_t cmd) {
     long int ret;
-    uint32_t data;
+    uint32_t data = 0;
 
     pr_info("Get command: %02X\n", cmd);
     if ((ret = i2c_master_send(stm_client, &cmd, 1)) < 0) {

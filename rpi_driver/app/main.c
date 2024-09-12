@@ -21,6 +21,7 @@ extern int init_userinput_thread();
 extern pthread_t init_ncurses_gui();
 extern int init_backend_thread();
 extern int stm_load_system_time(uint32_t *sys_time);
+extern int stm_load_pumping_time(uint32_t *pumping_time);
 
 #define DEBUG_APP
 
@@ -45,8 +46,12 @@ void print_log(const char *format, ...) {
 
 static int load_stm_data() {
     int ret = 0;
-    ret = stm_load_system_time(&sys_time);
-    print_log("Loaded the RTC time: %08X\n", sys_time);
+    sys_time = 0;
+    pumping_time = 0;
+    ret |= stm_load_system_time(&sys_time);
+    print_log("system time: %d\n", sys_time);
+    ret |= stm_load_pumping_time(&pumping_time);
+    print_log("pumping time: %d\n", pumping_time);
     return ret;
 }
 

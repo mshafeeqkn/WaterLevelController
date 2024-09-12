@@ -16,6 +16,7 @@ extern uint8_t          sync_clock;
 
 extern void print_log(const char *format, ...); 
 extern int stm_set_system_time(uint32_t sys_time);
+extern int stm_set_pumping_time(uint32_t pumping_time);
 
 void set_alarm_time() {
     char buffer[64];
@@ -31,6 +32,7 @@ void set_alarm_time() {
     } else {
         mvprintw(12, 0, "Invalid time format.");
     }
+    stm_set_pumping_time(pumping_time);
     refresh();  // Refresh to show any changes
 }
 

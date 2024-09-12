@@ -44,6 +44,14 @@ int stm_load_system_time(uint32_t *sys_time) {
     return stm_send_ioctl(IOCTL_GET_RTC_TIME, sys_time);
 }
 
+int stm_load_pumping_time(uint32_t *pumping_time) {
+    return stm_send_ioctl(IOCTL_GET_PUMPING_TIME, pumping_time);
+}
+
 int stm_set_system_time(uint32_t sys_time) {
     return stm_send_ioctl(IOCTL_SET_RTC_TIME, &sys_time);
+}
+
+int stm_set_pumping_time(uint32_t pumping_time) {
+    return stm_send_ioctl(IOCTL_SET_PUMPING_TIME, &pumping_time);
 }
