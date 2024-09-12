@@ -7,14 +7,16 @@ pthread_t user_input_thread;
 extern uint8_t          run_app;
 extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
+extern uint32_t         pc_time;
 extern uint32_t         pumping_time;
-extern uint16_t         voltage;
-extern uint16_t         pump_run_sec;
+extern uint32_t         pump_run_sec;
 extern uint32_t         foot_start_x;
 extern uint8_t          sync_clock;
 
 extern void print_log(const char *format, ...); 
 extern int stm_set_system_time(uint32_t sys_time);
+extern int stm_set_pumping_time(uint32_t pumping_time);
+extern int stm_set_pump_runtime(uint32_t pump_runtime);
 
 void set_alarm_time() {
     char buffer[64];
@@ -30,6 +32,7 @@ void set_alarm_time() {
     } else {
         mvprintw(12, 0, "Invalid time format.");
     }
+    stm_set_pumping_time(pumping_time);
     refresh();  // Refresh to show any changes
 }
 
@@ -41,27 +44,15 @@ void set_pumping_time() {
     noecho();  // Disable echoing
 
     // Parse the input time
-    if (sscanf(buffer, "%hu", &pump_run_sec) != 1) {
+    if (sscanf(buffer, "%u", &pump_run_sec) != 1) {
         mvprintw(12, 0, "Invalid number format.");
     }
+    stm_set_pump_runtime(pump_run_sec);
     refresh();  // Refresh to show any changes
 }
 
 void sync_system_clock() {
-    time_t tmp_time = time(NULL);
-
-    // Convert the current time to local time representation
-    struct tm *local_time = localtime(&tmp_time);
-    if (local_time == NULL) {
-        perror("localtime");
-        return;
-    }
-
-    sys_time = local_time->tm_sec +
-        (local_time->tm_min * 60) +
-        (local_time->tm_hour * 3600);
-
-    print_log("Set the RTC time: %08X\n", sys_time);
+    sys_time = pc_time;
     stm_set_system_time(sys_time);
 }
 

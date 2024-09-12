@@ -44,6 +44,26 @@ int stm_load_system_time(uint32_t *sys_time) {
     return stm_send_ioctl(IOCTL_GET_RTC_TIME, sys_time);
 }
 
+int stm_load_pumping_time(uint32_t *pumping_time) {
+    return stm_send_ioctl(IOCTL_GET_PUMPING_TIME, pumping_time);
+}
+
+int stm_load_pump_runtime(uint32_t *pump_runtime) {
+    return stm_send_ioctl(IOCTL_GET_PUMP_RUN_TIME, pump_runtime);
+}
+
+int stm_load_line_voltage(uint32_t *voltage) {
+    return stm_send_ioctl(IOCTL_GET_LINE_VOLTAGE, voltage);
+}
+
 int stm_set_system_time(uint32_t sys_time) {
     return stm_send_ioctl(IOCTL_SET_RTC_TIME, &sys_time);
+}
+
+int stm_set_pumping_time(uint32_t pumping_time) {
+    return stm_send_ioctl(IOCTL_SET_PUMPING_TIME, &pumping_time);
+}
+
+int stm_set_pump_runtime(uint32_t pump_runtime) {
+    return stm_send_ioctl(IOCTL_SET_PUMP_RUN_TIME, &pump_runtime);
 }

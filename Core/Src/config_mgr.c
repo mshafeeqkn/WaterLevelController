@@ -37,14 +37,15 @@ static uint8_t cur_command = 0;
 
 static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
     uint32_t i2c_data = 0;
-    uint8_t i;
 
     if(I2C_MODE_RX == mode) {
         cur_command = data[0];
         if(cur_command <= 0x7F) {
             i2c_data = (data[1] | data[2] << 8 | data[3] << 16 | data[4] << 24);
         }
+#ifdef DEBUG_ENABLED
         uart1_send_string("I2C command: %02X: data: %u\r\n", cur_command, i2c_data);
+#endif
         switch(cur_command) {
             case SET_RTC_TIME:
                 set_rtc_time(i2c_data);
@@ -76,14 +77,11 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
                 i2c_data = get_current_voltage(5);
                 break;
         }
-
+#ifdef DEBUG_ENABLED
+        uart1_send_string("i2c_data = %x\r\n", i2c_data);
+#endif
         // Set the data to be sent to 'data' variable
-        i = 0;
-        while(i2c_data) {
-            data[i++] = i2c_data & 0xFF;
-            i2c_data >>= 8;
-        }
-
+        *(uint32_t*)data = i2c_data;
     }
 }
 

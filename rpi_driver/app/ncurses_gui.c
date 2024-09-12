@@ -8,9 +8,10 @@ pthread_t gui_thread;
 extern uint8_t          run_app;
 extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
+extern uint32_t         pc_time;
 extern uint32_t         pumping_time;
-extern uint16_t         voltage;
-extern uint16_t         pump_run_sec;
+extern uint32_t         voltage;
+extern uint32_t         pump_run_sec;
 
 int foot_start_x;
 extern void print_log(const char *format, ...); 
@@ -26,9 +27,10 @@ static void get_time_string(char *buff, uint32_t time) {
 }
 
 static void* ncurses_ui_thread(void *arg) {
-  char buff[64] = {0};
+    char buff[64] = {0};
     const char *footer = " Q: Quit     S: Sync time    A: Set pumping time  P: Set pump run time ";
     const int foot_len = strlen(footer);
+    int diff = 0;
 
     // Initialize ncurses
     initscr();              // Start curses mode
@@ -51,7 +53,8 @@ static void* ncurses_ui_thread(void *arg) {
         pthread_mutex_lock(&app_mutex);
         clear();            // Clear the screen
         get_time_string(buff, sys_time);
-        mvprintw(5, foot_start_x + 20, " System Time     : %s", buff);  // Print the counter
+        diff = pc_time - sys_time;
+        mvprintw(5, foot_start_x + 20, " System Time     : %s (%d)", buff, diff);  // Print the counter
         get_time_string(buff, pumping_time);
         mvprintw(6, foot_start_x + 20, " Pumping Time    : %s", buff);  // Print the counter
         mvprintw(7, foot_start_x + 20, " Current Voltage : %dv", voltage);  // Print the counter
