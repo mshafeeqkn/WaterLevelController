@@ -10,8 +10,8 @@ extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
 extern uint32_t         pc_time;
 extern uint32_t         pumping_time;
-extern uint16_t         voltage;
-extern uint16_t         pump_run_sec;
+extern uint32_t         voltage;
+extern uint32_t         pump_run_sec;
 
 int foot_start_x;
 extern void print_log(const char *format, ...); 

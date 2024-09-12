@@ -184,7 +184,8 @@ uint16_t get_current_voltage(uint8_t repeat) {
             }
 
             reading_voltage = sqrt(sq_sum/NUM_INPUT_VOLT_SAMPLE) * VREF_VOLT * MULTIPLIER / ADC_RESOLUTION;
-#ifdef DEBUG_ENABLED
+#if 0
+            // Caution: Uncommenting this section will leads to I2C timeout
             char buff[16];
             double2str(reading_voltage, buff, 7);
             uart1_send_string("voltage = %u - %s\r\n", (uint16_t)reading_voltage, buff);

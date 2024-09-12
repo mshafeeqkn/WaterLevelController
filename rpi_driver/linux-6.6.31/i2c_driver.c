@@ -47,7 +47,7 @@ static void serialize_data(uint8_t cmd, uint32_t data, uint8_t serial_data[]) {
     *(uint32_t*)(serial_data+1) = data;
 }
 
-static long int send_i2c_time(long unsigned int arg, uint8_t cmd) {
+static long int send_i2c_data(long unsigned int arg, uint8_t cmd) {
     uint32_t tim;
     uint8_t serial_data[8];
     long int ret = 0;
@@ -70,7 +70,7 @@ static long int send_i2c_time(long unsigned int arg, uint8_t cmd) {
     return ret;
 }
 
-static long int get_i2c_time(long unsigned int arg, uint8_t cmd) {
+static long int get_i2c_data(long unsigned int arg, uint8_t cmd) {
     long int ret;
     uint32_t data = 0;
 
@@ -95,24 +95,26 @@ static long int stm_ioctl(struct file *f, unsigned int cmd,  long unsigned int a
 
     switch(cmd) {
         case IOCTL_SET_RTC_TIME:
-            ret = send_i2c_time(arg, SET_RTC_TIME);
+            ret = send_i2c_data(arg, SET_RTC_TIME);
             break;
         case IOCTL_SET_PUMPING_TIME:
-            ret = send_i2c_time(arg, SET_PUMPING_TIME);
+            ret = send_i2c_data(arg, SET_PUMPING_TIME);
             break;
         case IOCTL_SET_PUMP_RUN_TIME:
-            ret = send_i2c_time(arg, SET_PUMP_RUN_TIME);
+            ret = send_i2c_data(arg, SET_PUMP_RUN_TIME);
             break;
 
         case IOCTL_GET_RTC_TIME:
-            ret = get_i2c_time(arg, GET_RTC_TIME);
+            ret = get_i2c_data(arg, GET_RTC_TIME);
             break;
         case IOCTL_GET_PUMPING_TIME:
-            ret = get_i2c_time(arg, GET_PUMPING_TIME);
+            ret = get_i2c_data(arg, GET_PUMPING_TIME);
             break;
         case IOCTL_GET_PUMP_RUN_TIME:
+            ret = get_i2c_data(arg, GET_PUMP_RUN_TIME);
             break;
         case IOCTL_GET_LINE_VOLTAGE:
+            ret = get_i2c_data(arg, GET_LINE_VOLTAGE);
             break;
     }
     return ret;

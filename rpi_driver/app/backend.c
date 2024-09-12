@@ -7,16 +7,23 @@ extern uint8_t          run_app;
 extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
 extern uint32_t         pc_time;
+extern uint32_t         voltage;
 extern uint32_t         pumping_time;
-extern uint16_t         voltage;
-extern uint16_t         pump_run_sec;
 
 static pthread_t   backend_thread;
+extern int stm_load_line_voltage(uint32_t *voltage);
+
+
 void* thread_backend(void *arg) {
+    uint8_t rep = 0;
     while (run_app) {
         pthread_mutex_lock(&app_mutex);
         sys_time++;
         pc_time++;
+        if(++rep == 5) {
+            stm_load_line_voltage(&voltage);
+            rep = 0;
+        }
         pthread_mutex_unlock(&app_mutex);
         sleep(1);
     }

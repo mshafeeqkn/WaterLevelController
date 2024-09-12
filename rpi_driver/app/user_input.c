@@ -9,14 +9,14 @@ extern pthread_mutex_t  app_mutex;
 extern uint32_t         sys_time;
 extern uint32_t         pc_time;
 extern uint32_t         pumping_time;
-extern uint16_t         voltage;
-extern uint16_t         pump_run_sec;
+extern uint32_t         pump_run_sec;
 extern uint32_t         foot_start_x;
 extern uint8_t          sync_clock;
 
 extern void print_log(const char *format, ...); 
 extern int stm_set_system_time(uint32_t sys_time);
 extern int stm_set_pumping_time(uint32_t pumping_time);
+extern int stm_set_pump_runtime(uint32_t pump_runtime);
 
 void set_alarm_time() {
     char buffer[64];
@@ -44,9 +44,10 @@ void set_pumping_time() {
     noecho();  // Disable echoing
 
     // Parse the input time
-    if (sscanf(buffer, "%hu", &pump_run_sec) != 1) {
+    if (sscanf(buffer, "%u", &pump_run_sec) != 1) {
         mvprintw(12, 0, "Invalid number format.");
     }
+    stm_set_pump_runtime(pump_run_sec);
     refresh();  // Refresh to show any changes
 }
 

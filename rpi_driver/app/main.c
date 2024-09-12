@@ -11,8 +11,8 @@ pthread_mutex_t  app_mutex;
 uint32_t         sys_time;
 uint32_t         pc_time;
 uint32_t         pumping_time;
-uint16_t         voltage;
-uint16_t         pump_run_sec;
+uint32_t         voltage;
+uint32_t         pump_run_sec;
 uint8_t          sync_clock = 0;
 
 pthread_mutex_t run_app_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -22,6 +22,8 @@ extern pthread_t init_ncurses_gui();
 extern int init_backend_thread();
 extern int stm_load_system_time(uint32_t *sys_time);
 extern int stm_load_pumping_time(uint32_t *pumping_time);
+extern int stm_load_line_voltage(uint32_t *voltage);
+extern int stm_load_pump_runtime(uint32_t *pump_runtime);
 
 #define DEBUG_APP
 
@@ -46,12 +48,19 @@ void print_log(const char *format, ...) {
 
 static int load_stm_data() {
     int ret = 0;
-    sys_time = 0;
-    pumping_time = 0;
+
     ret |= stm_load_system_time(&sys_time);
     print_log("system time: %d\n", sys_time);
+
     ret |= stm_load_pumping_time(&pumping_time);
     print_log("pumping time: %d\n", pumping_time);
+
+    ret |= stm_load_pump_runtime(&pump_run_sec);
+    print_log("pump run time: %d\n", pump_run_sec);
+
+    ret |= stm_load_line_voltage(&voltage);
+    print_log("line voltage: %d\n", voltage);
+
     return ret;
 }
 
