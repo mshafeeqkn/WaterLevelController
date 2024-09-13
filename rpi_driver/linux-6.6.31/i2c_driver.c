@@ -4,6 +4,7 @@
 #include <linux/device.h>
 #include <linux/uaccess.h>
 #include <linux/i2c.h>
+#include <linux/version.h>
 
 #define DEVICE_NAME     "wlc"
 #define CLASS_NAME      "wlc_class"
@@ -142,7 +143,11 @@ static int __init simple_drv_readtest_init(void) {
     }
 
     // Register class driver
-    char_class = class_create(CLASS_NAME);
+    char_class = class_create(
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
+            THIS_MODULE,
+#endif
+            CLASS_NAME);
     if( IS_ERR(char_class)) {
         unregister_chrdev(major_num, DEVICE_NAME);
         return PTR_ERR(char_class);
