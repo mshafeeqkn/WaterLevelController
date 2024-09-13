@@ -68,8 +68,8 @@ void init_voltage_monitor() {
     RCC->AHBENR  |= RCC_AHBENR_DMA1EN;   // DMA1 clock enable
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
 
-    // 2. Configure the ADC
-    ADC1->SQR3 = 6; // Channel 6 as the 1st conversion in regular sequence
+    // select the ADC channel 7
+    ADC1->SQR3 = VOLTAGE_MONITOR_PIN;
 
     // 3. Configure ADC1 CR2 register
     // ADC1->CR2 |= ADC_CR2_CONT;    // Continuous conversion mode
