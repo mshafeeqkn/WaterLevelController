@@ -27,12 +27,17 @@
 #include "config_mgr.h"
 
 
-#ifdef DEBUG_ENABLED
+#define ST_EVERY_n_SEC_START(n)     {\
+                                        static uint8_t __uint##n; \
+                                        if(((++__uint##n) % (2 *n)) == 0) { \
+                                            __uint##n = 0;
+#define ST_EVERY_SEC_END()          }}
 
+
+#ifdef DEBUG_ENABLED
 #define TURN_ON_LED()            turn_led_on(TURN_ON)
 #define TURN_OFF_LED()           turn_led_on(TURN_OFF)
 #define TOGGLE_LED()             turn_led_on(TURN_TOGGLE)
-
 
 typedef enum {
     TURN_OFF,
@@ -66,6 +71,10 @@ void SysTick_Handler() {
     if(level == TANK_LEVEL_100) {
         turn_off_water_pump();
     }
+    // Run the following block in every sec
+    ST_EVERY_n_SEC_START(1)
+    decr_pumping_time_btn_count_down();
+    ST_EVERY_SEC_END()
 }
 /**
  * @brief Configure the system clock as 8MHz using
@@ -95,21 +104,9 @@ static void init_systick_timer() {
     SysTick->CTRL |= (1 << SysTick_CTRL_ENABLE_Pos);
 }
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-void delay(uint32_t ms) {
-    uint32_t i, j;
-    for(j = 0; j < ms; j++) {
-        for(i = 0; i < 800; i++) {
-            __NOP();
-        }
-    }
-}
-
 int main(void) {
     __disable_irq();
+
 #ifdef DEBUG_ENABLED
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
@@ -119,17 +116,35 @@ int main(void) {
     TURN_OFF_LED();
 #endif
 
+    // Configure system clock (8MHz crystal with no pre-scaler)
     config_sys_clock();
+
+    // Enable the UART for debugging purpose
     uart1_setup(UART_TX_ENABLE);
+
+    // Initialize configuration manager
     init_config_mgr();
+
+    // Initialize the LED indicator board
     init_led_indicators();
+
+    // Initialize the tank and pump monitor module
     init_tank_pump_monitor();
+
+    // Initialize the water pump controller module
     init_water_pump();
+
+    // Intialize the voltage monitor
     init_voltage_monitor();
+
+    // Start the systick timer
     init_systick_timer();
+
+    // Enable IRQ global flag
     __enable_irq();
 
+    // Run for ever
     while(1) {
-        delay(1);
+        __NOP();
     }
 }
