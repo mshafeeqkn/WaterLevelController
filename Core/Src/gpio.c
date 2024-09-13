@@ -122,7 +122,8 @@ void EXTI4_IRQHandler() {
     }
 }
 
-void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, ext_intr_callback_t cb) {
+void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, stm_exti_edge_t edge,
+                ext_intr_callback_t cb) {
     uint8_t exticr_reg_conf = 0;
     ext_intr_callback[pin] = cb;
 
@@ -148,8 +149,15 @@ void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, ext_intr_callback_t cb) 
     // Tie the given pin to the given interrupt line
     AFIO->EXTICR[pin/4] |= exticr_reg_conf << ((pin % 4) * 4);
 
+    // Trigger on raising edge
+    if(edge & EXTI_RAISING) {
+        EXTI->FTSR |= (1 << pin);
+    }
+
     // Trigger on falling edge
-    EXTI->RTSR |= (1 << pin);
+    if(edge & EXTI_FALLING) {
+        EXTI->RTSR |= (1 << pin);
+    }
 
     // Interrupt masking
     EXTI->IMR |= (1 << pin);

@@ -40,6 +40,11 @@ typedef enum {
     GPIO_OUTPUT
 } stm_gpio_dir_t;
 
+typedef enum {
+    EXTI_RAISING = 1,
+    EXTI_FALLING = 2
+} stm_exti_edge_t;
+
 typedef GPIO_TypeDef*   stm_gpio_port_t;
 typedef void (*ext_intr_callback_t)();
 
@@ -55,7 +60,8 @@ typedef void (*ext_intr_callback_t)();
 void set_gpio_dir(stm_gpio_port_t port, uint8_t pin, stm_gpio_dir_t dir);
 void set_gpio_val(stm_gpio_port_t port, uint8_t pin, uint8_t val);
 uint8_t get_gpio_val(stm_gpio_port_t port, uint8_t pin);
-void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, ext_intr_callback_t cb);
+void enable_ext_intr(stm_gpio_port_t port, uint8_t pin, stm_exti_edge_t edge,
+            ext_intr_callback_t cb);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

@@ -20,14 +20,17 @@
 #include <stdbool.h>
 #include "pump_controller.h"
 #include "gpio.h"
+#include "rtc.h"
 #include "timers.h"
 #include "led_indicator.h"
 #include "pump_tank_monitor.h"
 #include "common.h"
 
-#define DRY_RUN_THRESOLD_SEC        20
+#define DRY_RUN_THRESOLD_SEC                20
+#define PUMPING_TIME_BUTTON_COUNT_DOWN      4
 
-static uint32_t one_shot_pumping_time_sec = 120;
+static volatile uint32_t one_shot_pumping_time_sec   = 120;
+static volatile uint8_t  pumping_time_btn_count_down = 0;
 
 static void on_single_shot_btn_press() {
     // TODO: It will trigger on startup and automatically
@@ -36,9 +39,34 @@ static void on_single_shot_btn_press() {
     // turn_on_water_pump(one_shot_pumping_time_sec);
 }
 
+static void on_pumping_time_btn_pressed() {
+    uint32_t rtc_time;
+    if((0 == (GPIOB->IDR & GPIO_IDR_IDR1)) &&
+            (1 == pumping_time_btn_count_down) ) {
+        // This portion will be executed if the button
+        // is pressed and hold for PUMPING_TIME_BUTTON_COUNT_DOWN sec
+        pumping_time_btn_count_down = 0;
+        rtc_time = get_rtc_time();
+        set_rtc_alarm_time(rtc_time);
+    }
+
+    if(0 != (GPIOB->IDR & GPIO_IDR_IDR1)) {
+        // Load maximum count down when the button is pressed
+        pumping_time_btn_count_down = PUMPING_TIME_BUTTON_COUNT_DOWN;
+    }
+}
+
+void decr_pumping_time_btn_count_down() {
+    if(pumping_time_btn_count_down > 1) {
+        pumping_time_btn_count_down--;
+    }
+}
+
 void init_water_pump() {
     set_gpio_dir(PUMP_CONTROL_PIN, GPIO_OUTPUT);
-    enable_ext_intr(SINGLE_SHOT_PUMP_PIN, on_single_shot_btn_press);
+    enable_ext_intr(SINGLE_SHOT_PUMP_PIN, EXTI_FALLING, on_single_shot_btn_press);
+    enable_ext_intr(PUMP_ON_TIME_SET_PIN,
+            EXTI_FALLING|EXTI_RAISING, on_pumping_time_btn_pressed);
     init_1s_timer_3();
     turn_off_water_pump();
 }

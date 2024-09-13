@@ -61,41 +61,51 @@ static void timer_1_500us_cc1() {
 
 
 void init_voltage_monitor() {
+    // Intialize the timer that trigger
+    // every 500us
     timer_1_500us_cc1();
 
-    // 1. Enable the clock for ADC1 and DMA1
-    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;  // ADC1 clock enable
-    RCC->AHBENR  |= RCC_AHBENR_DMA1EN;   // DMA1 clock enable
+    // Enable the clock for ADC1, GPIOA and DMA1
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+    RCC->AHBENR  |= RCC_AHBENR_DMA1EN;
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
 
     // select the ADC channel 7
     ADC1->SQR3 = VOLTAGE_MONITOR_PIN;
 
-    // 3. Configure ADC1 CR2 register
-    // ADC1->CR2 |= ADC_CR2_CONT;    // Continuous conversion mode
-    ADC1->CR2 |= ADC_CR2_DMA;     // Enable DMA mode
-    ADC1->CR2 |= ADC_CR2_ADON;    // Enable ADC
-    ADC1->CR2 |= ADC_CR2_EXTTRIG; // Start conversion on external trigger
-    ADC1->CR2 &= ~ADC_CR2_EXTSEL; // The external trigger is TIM1 CC1
+    // Configure ADC1 CR2 register, DMA, enable ADC
+    // Start conversion on external trigger and the
+    // external trigger is compare match CC1 of TIM1
+    ADC1->CR2 |= ADC_CR2_DMA;
+    ADC1->CR2 |= ADC_CR2_ADON;
+    ADC1->CR2 |= ADC_CR2_EXTTRIG;
+    ADC1->CR2 &= ~ADC_CR2_EXTSEL;
 
-    // 4. Configure DMA1 Channel 1 for ADC1
-    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;      // Peripheral address (ADC data register)
-    DMA1_Channel1->CMAR = (uint32_t)adc_buff;     // Memory address (adc_buff)
-    // DMA1_Channel1->CNDTR = NUM_INPUT_VOLT_SAMPLE;   // Number of data to transfer (100 samples)
-    DMA1_Channel1->CCR |= DMA_CCR_MINC;             // Memory increment mode
-    DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;          // Peripheral size 16-bits
-	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;          // Memory size 16-bits
-    // DMA1_Channel1->CCR |= DMA_CCR_CIRC;            // Enable circular mode
-    DMA1_Channel1->CCR |= DMA_CCR_EN;              // Enable DMA Channel 1
+    // Configure DMA1 Channel 1 for ADC1
+    // Peripheral address (ADC data register)
+    DMA1_Channel1->CPAR = (uint32_t)&ADC1->DR;
+    // Memory address (adc_buff)
+    DMA1_Channel1->CMAR = (uint32_t)adc_buff;
 
-    // 5. Start ADC conversion
-    ADC1->CR2 |= ADC_CR2_SWSTART; // Start conversion of regular channels
+    // Increment memory address and peripheral addres
+    // remain same. The peripheral and memory data sizes
+    // are 16-bits and finally enable the DMA channel 1
+    DMA1_Channel1->CCR |= DMA_CCR_MINC;
+    DMA1_Channel1->CCR |= DMA_CCR_PSIZE_0;
+	DMA1_Channel1->CCR |= DMA_CCR_MSIZE_0;
+    DMA1_Channel1->CCR |= DMA_CCR_EN;
+
+    // Start ADC conversion
+    ADC1->CR2 |= ADC_CR2_SWSTART;
 }
 
 static void start_adc_conversion(uint8_t count) {
-    DMA1_Channel1->CCR &= ~DMA_CCR_EN;              // Enable DMA Channel 1
-    DMA1_Channel1->CNDTR = count;                   // Number of data to transfer (100 samples)
-    DMA1_Channel1->CCR |= DMA_CCR_EN;               // Enable DMA Channel 1
+    // Disable DMA channel, configure the data to be
+    // transferred (here 100 samples) and then
+    // enable the DMA
+    DMA1_Channel1->CCR &= ~DMA_CCR_EN;
+    DMA1_Channel1->CNDTR = count;
+    DMA1_Channel1->CCR |= DMA_CCR_EN;
 }
 
 #if DEBUG_ENABLED // TODO: should be moved from here
