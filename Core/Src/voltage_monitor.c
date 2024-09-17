@@ -29,6 +29,7 @@
 #define     MULTIPLIER                   700.0
 
 volatile uint16_t adc_buff[NUM_INPUT_VOLT_SAMPLE];
+static volatile uint16_t line_volt = 0;
 
 static void timer_1_500us_cc1() {
     // Enable system clock to TIM1
@@ -146,7 +147,26 @@ void double2str(double value, char* str, int precision) {
 }
 #endif
 
-uint16_t get_current_voltage(uint8_t repeat) {
+#define     VOLTAGE_LEVEL_GOOD   220
+#define     VOLTAGE_LEVEL_OK     200
+#define     VOLTAGE_LEVEL_LOW    180
+#define     VOLTAGE_LEVEL_WARN   160
+
+voltage_level_t get_line_voltage_level() {
+    if(line_volt >= VOLTAGE_LEVEL_GOOD) {
+        return VOLTAGE_GOOD;
+    } else if(line_volt >= VOLTAGE_LEVEL_OK) {
+        return VOLTAGE_OK;
+    } else if(line_volt >= VOLTAGE_LEVEL_LOW) {
+        return VOLTAGE_LOW;
+    } else if(line_volt >= VOLTAGE_LEVEL_WARN) {
+        return VOLTAGE_WARN;
+    } else {
+        return VOLTAGE_CRIT;
+    }
+}
+
+uint16_t measure_current_voltage(uint8_t repeat) {
     uint16_t i, j = 0;
     uint32_t sum;
     uint32_t sq_sum;
@@ -212,8 +232,11 @@ uint16_t get_current_voltage(uint8_t repeat) {
 
         }
     }
+
+    line_volt = (uint16_t)(volt_sum/repeat);
+
 #ifdef DEBUG_ENABLED
-    uart1_send_string("Average voltage = %u\r\n", (uint16_t)(volt_sum/repeat));
+    uart1_send_string("Average voltage = %u\r\n", line_volt);
 #endif
-    return (uint16_t)(volt_sum/repeat);
+    return line_volt;
 }
