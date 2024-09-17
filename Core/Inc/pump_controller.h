@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdbool.h>
 #include "stm32f1xx.h"
 #include "common.h"
 
@@ -46,6 +47,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void init_water_pump();
+bool is_oneshot_run();
 void turn_on_water_pump(uint32_t timeout_sec);
 void turn_off_water_pump();
 void set_one_shot_pumping_time(uint32_t sec);
