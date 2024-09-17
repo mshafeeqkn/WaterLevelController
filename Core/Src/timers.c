@@ -72,7 +72,7 @@ void init_50ms_timer_2() {
 
     // Set pre-scalar 8000; so each count will take
     // 1ms delay since we are using 8MHz clock
-    TIM2->PSC = 7999;
+    TIM2->PSC = 799;
 
     // Count 0 - 49 (both inclusive - so total 50)
     TIM2->ARR = 49;
@@ -85,6 +85,9 @@ void init_50ms_timer_2() {
     // on the counter reset.
     TIM2->SR &= ~(TIM_SR_UIF);
     TIM2->DIER |= TIM_DIER_UIE;
+    uint32_t prioritygroup = NVIC_GetPriorityGrouping();
+    uint32_t tim2_priority = NVIC_EncodePriority(prioritygroup, 0, 0);
+    NVIC_SetPriority(TIM2_IRQn, tim2_priority);
     NVIC_EnableIRQ(TIM2_IRQn);
 }
 

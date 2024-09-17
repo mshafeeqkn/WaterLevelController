@@ -45,6 +45,8 @@ typedef enum {
     TURN_TOGGLE
 } LedState_t;
 
+static volatile bool calc_line_voltage = false;
+
 void turn_led_on(LedState_t state) {
     if(state == TURN_TOGGLE){
         GPIOC->ODR ^= GPIO_ODR_ODR13;
@@ -74,6 +76,10 @@ void SysTick_Handler() {
     // Run the following block in every sec
     ST_EVERY_n_SEC_START(1)
     decr_pumping_time_btn_count_down();
+    ST_EVERY_SEC_END()
+
+    ST_EVERY_n_SEC_START(5)
+    calc_line_voltage = true;
     ST_EVERY_SEC_END()
 }
 /**
@@ -145,6 +151,9 @@ int main(void) {
 
     // Run for ever
     while(1) {
-        __NOP();
+        if(calc_line_voltage) {
+            calc_line_voltage = false;
+            get_current_voltage(2);
+        }
     }
 }
