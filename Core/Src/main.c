@@ -68,6 +68,7 @@ static volatile bool stopped_forcefully = false;
 void SysTick_Handler() {
     tank_level_t level = get_tank_water_level();
     voltage_level_t volt_level = get_line_voltage_level();
+    bool oneshot_run = is_oneshot_run();
 
     set_water_level(level);
 
@@ -80,7 +81,7 @@ void SysTick_Handler() {
         stopped_forcefully = false;
     }
 
-    if(volt_level <= VOLTAGE_LOW && level >= TANK_LEVEL_60) {
+    if(!oneshot_run && volt_level <= VOLTAGE_LOW && level >= TANK_LEVEL_60) {
         stopped_forcefully = true;
         if(volt_level <= VOLTAGE_LOW) {
             turn_off_water_pump();

@@ -31,12 +31,11 @@
 
 static volatile uint32_t one_shot_pumping_time_sec   = 120;
 static volatile uint8_t  pumping_time_btn_count_down = 0;
+static volatile bool oneshot_run = false;
 
 static void on_single_shot_btn_press() {
-    // TODO: It will trigger on startup and automatically
-    // start the pump on system reset - need to address
-    // this issue
-    // turn_on_water_pump(one_shot_pumping_time_sec);
+    oneshot_run = true;
+    turn_on_water_pump(one_shot_pumping_time_sec);
 }
 
 static void on_pumping_time_btn_pressed() {
@@ -71,6 +70,10 @@ void init_water_pump() {
     turn_off_water_pump();
 }
 
+bool is_oneshot_run() {
+    return oneshot_run;
+}
+
 void set_one_shot_pumping_time(uint32_t sec) {
     one_shot_pumping_time_sec = sec;
 }
@@ -101,6 +104,7 @@ static void on_pumping_tick(bool done) {
     if(done) {
         turn_off_water_pump();
         seconds = 0;
+        oneshot_run = false;
     }
 }
 
