@@ -65,8 +65,12 @@ void set_error() {
 
 void SysTick_Handler() {
     tank_level_t level = get_tank_water_level();
+    voltage_level_t volt_level = get_line_voltage_level();
+
     set_water_level(level);
-    if(level < TANK_LEVEL_40) {
+
+    if((level < TANK_LEVEL_40 && volt_level >= VOLTAGE_OK) ||
+            level < TANK_LEVEL_20) {
         turn_on_water_pump(0);
     }
 
@@ -153,7 +157,7 @@ int main(void) {
     while(1) {
         if(calc_line_voltage) {
             calc_line_voltage = false;
-            get_current_voltage(2);
+            measure_current_voltage(2);
         }
     }
 }

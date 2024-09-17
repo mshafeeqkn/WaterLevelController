@@ -36,6 +36,14 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
+typedef enum {
+    VOLTAGE_CRIT,
+    VOLTAGE_WARN,
+    VOLTAGE_LOW,
+    VOLTAGE_OK,
+    VOLTAGE_GOOD
+} voltage_level_t;
+
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 /* USER CODE END EC */
@@ -46,7 +54,8 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void init_voltage_monitor();
-uint16_t get_current_voltage(uint8_t repeat);
+uint16_t measure_current_voltage(uint8_t repeat);
+voltage_level_t get_line_voltage_level();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
