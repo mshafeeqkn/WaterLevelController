@@ -23,7 +23,7 @@
 #include "rtc.h"
 #include "timers.h"
 #include "led_indicator.h"
-#include "pump_tank_monitor.h"
+#include "water_monitor.h"
 #include "common.h"
 
 #define DRY_RUN_THRESOLD_SEC                20

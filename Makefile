@@ -38,18 +38,18 @@ BUILD_DIR = build
 C_SOURCES =  \
 Core/Src/config_mgr.c \
 Core/Src/gpio.c \
-Core/Src/led_indicator.c \
 Core/Src/i2c.c \
+Core/Src/led_indicator.c \
 Core/Src/main.c \
 Core/Src/pump_controller.c \
-Core/Src/pump_tank_monitor.c \
 Core/Src/rtc.c \
 Core/Src/syscalls.c \
 Core/Src/sysmem.c \
 Core/Src/system_stm32f1xx.c \
 Core/Src/timers.c \
 Core/Src/uart.c \
-Core/Src/voltage_monitor.c
+Core/Src/voltage_monitor.c \
+Core/Src/water_monitor.c
 
 # ASM sources
 ASM_SOURCES =  \
