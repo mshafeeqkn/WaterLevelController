@@ -152,6 +152,10 @@ void double2str(double value, char* str, int precision) {
 #define     VOLTAGE_LEVEL_LOW    180
 #define     VOLTAGE_LEVEL_WARN   160
 
+uint16_t get_current_voltage() {
+    return line_volt;
+}
+
 voltage_level_t get_line_voltage_level() {
     if(line_volt >= VOLTAGE_LEVEL_GOOD) {
         return VOLTAGE_GOOD;

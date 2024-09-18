@@ -56,6 +56,7 @@ typedef enum {
 void init_voltage_monitor();
 uint16_t measure_current_voltage(uint8_t repeat);
 voltage_level_t get_line_voltage_level();
+uint16_t get_current_voltage();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
