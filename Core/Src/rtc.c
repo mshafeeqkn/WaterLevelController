@@ -35,6 +35,8 @@ void RTC_Alarm_IRQHandler() {
 }
 
 void init_rtc(alarm_callback_t callback) {
+    uint32_t alarm_time = 0;
+
     // Register the callback function
     alarm_cb = callback;
 
@@ -89,7 +91,8 @@ void init_rtc(alarm_callback_t callback) {
     NVIC_EnableIRQ(RTC_Alarm_IRQn);
 
     set_rtc_time(0);
-    set_rtc_alarm_time(10);
+    get_flash_data(FE_ALARM_TIME, &alarm_time);
+    set_rtc_alarm_time(alarm_time);
 }
 
 void set_rtc_time(uint32_t seconds) {
