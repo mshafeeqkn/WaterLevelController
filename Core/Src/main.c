@@ -35,18 +35,19 @@
 #define ST_EVERY_SEC_END()          }}
 
 
-#ifdef DEBUG_ENABLED
 #define TURN_ON_LED()            turn_led_on(TURN_ON)
 #define TURN_OFF_LED()           turn_led_on(TURN_OFF)
 #define TOGGLE_LED()             turn_led_on(TURN_TOGGLE)
 
+static volatile bool calc_line_voltage = false;
+
+#ifdef DEBUG_ENABLED
 typedef enum {
     TURN_OFF,
     TURN_ON,
     TURN_TOGGLE
 } LedState_t;
 
-static volatile bool calc_line_voltage = false;
 
 void turn_led_on(LedState_t state) {
     if(state == TURN_TOGGLE){
