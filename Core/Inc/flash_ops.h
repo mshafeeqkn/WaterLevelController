@@ -40,6 +40,11 @@ typedef struct {
     uint32_t run_time;
 } flash_data_t;
 
+typedef enum {
+    FE_ALARM_TIME,
+    FE_RUN_TIME
+} flash_enum_t;
+
 /* USER CODE BEGIN ET */
 
 /* USER CODE END ET */
@@ -56,12 +61,10 @@ typedef struct {
 
 /* Exported functions prototypes ---------------------------------------------*/
 
-void flash_unlock(void);
-void flash_lock(void);
-void flash_erase_page(uint32_t page_address);
-void flash_program_half_word(uint32_t address, uint16_t data);
-void flash_read_struct(uint32_t address, flash_data_t *data);
-void flash_write_struct(uint32_t address, flash_data_t *data);
+void load_flash_data();
+void save_flash_data();
+void get_flash_data(flash_enum_t elem, void *data);
+void set_flash_data(flash_enum_t elem, void *data);
 
 /* USER CODE BEGIN EFP */
 

@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include "rtc.h"
+#include "flash_ops.h"
 
 
 static alarm_callback_t alarm_cb = NULL;
@@ -139,13 +140,14 @@ void set_rtc_alarm_time(uint32_t seconds) {
     // registers has finished
     // while (!(RTC->CRL & RTC_CRL_RSF));
     while (!(RTC->CRL & RTC_CRL_RTOFF));
+    set_flash_data(FE_ALARM_TIME, &seconds);
 
 }
 
 uint32_t get_rtc_alarm_time() {
     // Clear the register sync flag and wait until this
     // flag is set to get the fresh data.
-    RTC->CRL &= ~RTC_CRL_RSF;
-    while(!(RTC->CRL & RTC_CRL_RSF));
-    return ((RTC->ALRH << 16) | RTC->ALRL);
+    uint32_t ret;
+    get_flash_data(FE_ALARM_TIME, &ret);
+    return ret;
 }

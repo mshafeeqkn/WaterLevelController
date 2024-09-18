@@ -22,6 +22,7 @@
 #include "gpio.h"
 #include "rtc.h"
 #include "timers.h"
+#include "flash_ops.h"
 #include "led_indicator.h"
 #include "water_monitor.h"
 #include "common.h"
@@ -29,13 +30,14 @@
 #define DRY_RUN_THRESOLD_SEC                20
 #define PUMPING_TIME_BUTTON_COUNT_DOWN      4
 
-static volatile uint32_t one_shot_pumping_time_sec   = 120;
 static volatile uint8_t  pumping_time_btn_count_down = 0;
 static volatile bool oneshot_run = false;
 
 static void on_single_shot_btn_press() {
+    uint32_t num_sec;
     oneshot_run = true;
-    turn_on_water_pump(one_shot_pumping_time_sec);
+    get_flash_data(FE_RUN_TIME, &num_sec);
+    turn_on_water_pump(num_sec);
 }
 
 static void on_pumping_time_btn_pressed() {
@@ -75,11 +77,13 @@ bool is_oneshot_run() {
 }
 
 void set_one_shot_pumping_time(uint32_t sec) {
-    one_shot_pumping_time_sec = sec;
+    set_flash_data(FE_RUN_TIME, &sec);
 }
 
 uint32_t get_one_shot_pumping_time() {
-    return one_shot_pumping_time_sec;
+    uint32_t ret;
+    get_flash_data(FE_RUN_TIME, &ret);
+    return ret;
 }
 
 static void on_pumping_tick(bool done) {
