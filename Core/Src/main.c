@@ -25,6 +25,7 @@
 #include "pump_controller.h"
 #include "voltage_monitor.h"
 #include "config_mgr.h"
+#include "flash_ops.h"
 
 
 #define ST_EVERY_n_SEC_START(n)     {\
