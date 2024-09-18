@@ -7,11 +7,12 @@
 #define     IOCTL_SET_RTC_TIME          _IOW('i', 0, uint32_t)
 #define     IOCTL_SET_PUMPING_TIME      _IOW('i', 1, uint32_t)
 #define     IOCTL_SET_PUMP_RUN_TIME     _IOW('i', 2, uint32_t)
+#define     IOCTL_SAVE_TO_FLASH         _IO('i', 3)
 
-#define     IOCTL_GET_RTC_TIME          _IOR('i', 3, uint32_t*)
-#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 4, uint32_t*)
-#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 5, uint32_t*)
-#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 6, uint32_t*)
+#define     IOCTL_GET_RTC_TIME          _IOR('i', 4, uint32_t*)
+#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 5, uint32_t*)
+#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 6, uint32_t*)
+#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 7, uint32_t*)
 
 #define     STM_DEVICE_FILE             "/dev/wlc"
 
@@ -66,4 +67,9 @@ int stm_set_pumping_time(uint32_t pumping_time) {
 
 int stm_set_pump_runtime(uint32_t pump_runtime) {
     return stm_send_ioctl(IOCTL_SET_PUMP_RUN_TIME, &pump_runtime);
+}
+
+int stm_save_to_flash() {
+    uint32_t num = 0;
+    return stm_send_ioctl(IOCTL_SAVE_TO_FLASH, &num);
 }

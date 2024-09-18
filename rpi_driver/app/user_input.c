@@ -17,6 +17,7 @@ extern void print_log(const char *format, ...);
 extern int stm_set_system_time(uint32_t sys_time);
 extern int stm_set_pumping_time(uint32_t pumping_time);
 extern int stm_set_pump_runtime(uint32_t pump_runtime);
+extern int stm_save_to_flash();
 
 void set_alarm_time() {
     char buffer[64];
@@ -56,6 +57,10 @@ void sync_system_clock() {
     stm_set_system_time(sys_time);
 }
 
+void save_to_flash() {
+    stm_save_to_flash();
+}
+
 void* ncurses_cmd_thread(void *arg) {
     while (1) {
         print_log("Looping command thread\n");
@@ -80,6 +85,11 @@ void* ncurses_cmd_thread(void *arg) {
             case 'p':
             case 'P':
                 set_pumping_time();
+                break;
+
+            case 'W':
+            case 'w':
+                save_to_flash();
                 break;
         }
         pthread_mutex_unlock(&app_mutex);

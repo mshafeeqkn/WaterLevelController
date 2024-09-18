@@ -28,7 +28,7 @@ static void get_time_string(char *buff, uint32_t time) {
 
 static void* ncurses_ui_thread(void *arg) {
     char buff[64] = {0};
-    const char *footer = " Q: Quit     S: Sync time    A: Set pumping time  P: Set pump run time ";
+    const char *footer = " Q: Quit  S: Sync time  A: pumping time  P: pump run time  W: Save ";
     const int foot_len = strlen(footer);
     int diff = 0;
 
