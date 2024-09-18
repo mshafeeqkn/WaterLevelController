@@ -85,12 +85,6 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
     }
 }
 
-static void on_rtc_alarm() {
-}
-
 void init_config_mgr() {
     i2c_slave_init(I2C_SLAVE_ADDRESS, on_i2c_event);
-    init_rtc(on_rtc_alarm);
-    set_rtc_time(0);
-    // set_rtc_alarm_time(1245);
 }

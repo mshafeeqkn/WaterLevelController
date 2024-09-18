@@ -233,7 +233,6 @@ uint16_t measure_current_voltage(uint8_t repeat) {
         }
     }
 
-    // line_volt = 199;
     line_volt = (uint16_t)(volt_sum/repeat);
 
 #ifdef DEBUG_ENABLED

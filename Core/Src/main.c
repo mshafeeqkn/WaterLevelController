@@ -133,6 +133,10 @@ static void init_systick_timer() {
     SysTick->CTRL |= (1 << SysTick_CTRL_ENABLE_Pos);
 }
 
+static void on_rtc_alarm() {
+    turn_on_water_pump(0);
+}
+
 int main(void) {
     __disable_irq();
 
@@ -168,6 +172,9 @@ int main(void) {
 
     // Start the systick timer
     init_systick_timer();
+
+    // Initialize RTC
+    init_rtc(on_rtc_alarm);
 
     // Enable IRQ global flag
     __enable_irq();

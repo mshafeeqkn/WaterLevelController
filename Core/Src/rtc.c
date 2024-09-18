@@ -86,6 +86,9 @@ void init_rtc(alarm_callback_t callback) {
     EXTI->RTSR |= EXTI_RTSR_TR17;
     NVIC_SetPriority(RTC_Alarm_IRQn, 0);
     NVIC_EnableIRQ(RTC_Alarm_IRQn);
+
+    set_rtc_time(0);
+    set_rtc_alarm_time(10);
 }
 
 void set_rtc_time(uint32_t seconds) {
