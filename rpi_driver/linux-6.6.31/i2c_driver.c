@@ -25,14 +25,17 @@ static struct i2c_client*       stm_client = NULL;
 #define     IOCTL_SET_PUMPING_TIME      _IOW('i', 1, uint32_t)
 #define     IOCTL_SET_PUMP_RUN_TIME     _IOW('i', 2, uint32_t)
 
-#define     IOCTL_GET_RTC_TIME          _IOR('i', 3, uint32_t*)
-#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 4, uint32_t*)
-#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 5, uint32_t*)
-#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 6, uint32_t*)
+#define     IOCTL_SAVE_TO_FLASH         _IO('i', 3)
+
+#define     IOCTL_GET_RTC_TIME          _IOR('i', 4, uint32_t*)
+#define     IOCTL_GET_PUMPING_TIME      _IOR('i', 5, uint32_t*)
+#define     IOCTL_GET_PUMP_RUN_TIME     _IOR('i', 6, uint32_t*)
+#define     IOCTL_GET_LINE_VOLTAGE      _IOR('i', 7, uint32_t*)
 
 #define     SET_RTC_TIME            0x10
 #define     SET_PUMPING_TIME        0x20
 #define     SET_PUMP_RUN_TIME       0x30
+#define     WRITE_TO_FLASH          0x40
 
 #define     GET_RTC_TIME            0x80
 #define     GET_PUMPING_TIME        0x90
@@ -103,6 +106,9 @@ static long int stm_ioctl(struct file *f, unsigned int cmd,  long unsigned int a
             break;
         case IOCTL_SET_PUMP_RUN_TIME:
             ret = send_i2c_data(arg, SET_PUMP_RUN_TIME);
+            break;
+        case IOCTL_SAVE_TO_FLASH:
+            ret = send_i2c_data(arg, WRITE_TO_FLASH);
             break;
 
         case IOCTL_GET_RTC_TIME:

@@ -22,11 +22,13 @@
 #include "rtc.h"
 #include "pump_controller.h"
 #include "voltage_monitor.h"
+#include "flash_ops.h"
 #include "common.h"
 
 #define  SET_RTC_TIME           0x10
 #define  SET_PUMPING_TIME       0x20
 #define  SET_PUMP_RUN_TIME      0x30
+#define  WRITE_TO_FLASH         0x40
 
 #define  GET_RTC_TIME           0x80
 #define  GET_PUMPING_TIME       0x90
@@ -57,6 +59,10 @@ static void on_i2c_event(uint8_t *data, uint8_t len, i2c_mode_t mode) {
 
             case SET_PUMP_RUN_TIME:
                 set_one_shot_pumping_time(i2c_data);
+                break;
+
+            case WRITE_TO_FLASH:
+                save_flash_data();
                 break;
         }
     } else if(I2C_MODE_TX == mode) {

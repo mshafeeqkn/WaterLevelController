@@ -25,6 +25,7 @@
 #include "pump_controller.h"
 #include "voltage_monitor.h"
 #include "config_mgr.h"
+#include "flash_ops.h"
 
 
 #define ST_EVERY_n_SEC_START(n)     {\
@@ -105,6 +106,7 @@ void SysTick_Handler() {
     calc_line_voltage = true;
     ST_EVERY_SEC_END()
 }
+
 /**
  * @brief Configure the system clock as 8MHz using
  * external crystal oscillator.
@@ -151,6 +153,9 @@ int main(void) {
 
     // Configure system clock (8MHz crystal with no pre-scaler)
     config_sys_clock();
+
+    // Load saved data
+    load_flash_data();
 
     // Enable the UART for debugging purpose
     uart1_setup(UART_TX_ENABLE);
