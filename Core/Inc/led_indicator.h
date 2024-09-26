@@ -55,6 +55,8 @@ void init_led_indicators();
 void set_pump_status(pump_status_t status);
 void set_water_level(tank_level_t level);
 pump_status_t get_pump_status();
+void set_low_voltage_status();
+void clear_low_voltage_status();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

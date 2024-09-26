@@ -90,6 +90,12 @@ void SysTick_Handler() {
         }
     }
 
+    if(volt_level <= VOLTAGE_LOW) {
+        set_low_voltage_status();
+    } else {
+        clear_low_voltage_status();
+    }
+
     if(level < TANK_LEVEL_20) {
         turn_on_water_pump(0);
     }
