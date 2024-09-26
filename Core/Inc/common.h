@@ -77,6 +77,13 @@ extern "C" {
 #define     UART_RX_PIN               PORTA,10
 #define     UART_TX_PIN               PORTA,9
 
+// How many second the pump should keep the
+// dry run status.
+#define     DRY_RUN_HOLD_TIME         20
+
+// How many seconds the device should detect
+// to set the dry run status
+#define     DRY_RUN_THRESOLD_SEC      20
 
 typedef enum {
     TANK_LEVEL_0,

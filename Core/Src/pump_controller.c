@@ -27,7 +27,6 @@
 #include "water_monitor.h"
 #include "common.h"
 
-#define DRY_RUN_THRESOLD_SEC                20
 #define PUMPING_TIME_BUTTON_COUNT_DOWN      4
 
 static volatile uint8_t  pumping_time_btn_count_down = 0;
@@ -99,7 +98,8 @@ static void on_pumping_tick(bool done) {
 
     if(dry_run_sec > DRY_RUN_THRESOLD_SEC) {
         set_timer_3_enable(false);
-        set_gpio_val(PUMP_CONTROL_PIN, 0);
+        // Set pin high to turn off the pump
+        set_gpio_val(PUMP_CONTROL_PIN, 1);
         set_pump_status(PUMP_DRY_RUN);
         seconds = 0;
         dry_run_sec = 0;
@@ -113,15 +113,18 @@ static void on_pumping_tick(bool done) {
 }
 
 void turn_on_water_pump(uint32_t timeout_sec) {
-    if(PUMP_DRY_RUN == get_pump_status())
+    if(PUMP_DRY_RUN == get_pump_status() ||
+        PUMP_RUN == get_pump_status())
         return;
 
-    set_gpio_val(PUMP_CONTROL_PIN, 1);
+    // Set pin low to turn on the pump
+    set_gpio_val(PUMP_CONTROL_PIN, 0);
     run_timer_3(timeout_sec, on_pumping_tick);
     set_pump_status(PUMP_RUN);
 }
 
 void turn_off_water_pump() {
-    set_gpio_val(PUMP_CONTROL_PIN, 0);
+    // Set pin high to turn off the pump
+    set_gpio_val(PUMP_CONTROL_PIN, 1);
     set_pump_status(PUMP_OFF);
 }

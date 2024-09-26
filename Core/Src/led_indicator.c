@@ -84,6 +84,7 @@ void init_led_indicators() {
     set_gpio_dir(LED_LEVEL_20_PIN, GPIO_OUTPUT);
 
     set_gpio_dir(LED_DRY_RUN_PIN, GPIO_OUTPUT);
+    set_gpio_dir(LOW_VOLTAGE_INDIC_PIN, GPIO_OUTPUT);
     init_50ms_timer_2();
 
     // Run timer 2 forever and set status LED as off
@@ -126,4 +127,12 @@ void set_pump_status(pump_status_t status) {
             off_rep_count = 150;
         }
     }
+}
+
+void set_low_voltage_status() {
+    set_gpio_val(LOW_VOLTAGE_INDIC_PIN, 1);
+}
+
+void clear_low_voltage_status() {
+    set_gpio_val(LOW_VOLTAGE_INDIC_PIN, 0);
 }
