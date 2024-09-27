@@ -31,6 +31,7 @@
 
 static volatile uint8_t  pumping_time_btn_count_down = 0;
 static volatile bool oneshot_run = false;
+static volatile bool auto_mode = false;
 
 static void on_single_shot_btn_press() {
     uint32_t num_sec;
@@ -56,6 +57,14 @@ static void on_pumping_time_btn_pressed() {
     }
 }
 
+static void on_auto_manual_btn_press() {
+    if(0 != (GPIOA->IDR & GPIO_IDR_IDR2)) {
+        auto_mode = true;
+    } else {
+        auto_mode = false;
+    }
+}
+
 void decr_pumping_time_btn_count_down() {
     if(pumping_time_btn_count_down > 1) {
         pumping_time_btn_count_down--;
@@ -67,8 +76,14 @@ void init_water_pump() {
     enable_ext_intr(SINGLE_SHOT_PUMP_PIN, EXTI_FALLING, on_single_shot_btn_press);
     enable_ext_intr(PUMP_ON_TIME_SET_PIN,
             EXTI_FALLING|EXTI_RAISING, on_pumping_time_btn_pressed);
+    enable_ext_intr(AUTO_MANUAL_PIN,
+            EXTI_RAISING|EXTI_FALLING, on_auto_manual_btn_press);
+
     init_1s_timer_3();
     turn_off_water_pump();
+    if(0 != (GPIOA->IDR & GPIO_IDR_IDR2)) {
+        auto_mode = true;
+    }
 }
 
 bool is_oneshot_run() {
@@ -127,4 +142,8 @@ void turn_off_water_pump() {
     // Set pin high to turn off the pump
     set_gpio_val(PUMP_CONTROL_PIN, 1);
     set_pump_status(PUMP_OFF);
+}
+
+bool is_wlc_automode() {
+    return auto_mode;
 }

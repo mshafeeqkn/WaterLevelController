@@ -53,6 +53,7 @@ void turn_off_water_pump();
 void set_one_shot_pumping_time(uint32_t sec);
 uint32_t get_one_shot_pumping_time();
 void decr_pumping_time_btn_count_down();
+bool is_wlc_automode();
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
