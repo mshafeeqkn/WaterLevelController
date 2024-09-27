@@ -40,6 +40,7 @@
 #define TOGGLE_LED()             turn_led_on(TURN_TOGGLE)
 
 static volatile bool calc_line_voltage = false;
+static volatile bool stopped_forcefully = false;
 
 #ifdef DEBUG_ENABLED
 typedef enum {
@@ -47,7 +48,6 @@ typedef enum {
     TURN_ON,
     TURN_TOGGLE
 } LedState_t;
-
 
 void turn_led_on(LedState_t state) {
     if(state == TURN_TOGGLE){
@@ -65,14 +65,21 @@ void set_error() {
 
 #endif // DEBUG_ENABLED
 
-static volatile bool stopped_forcefully = false;
-
 void SysTick_Handler() {
-    tank_level_t level = get_tank_water_level();
-    voltage_level_t volt_level = get_line_voltage_level();
-    bool oneshot_run = is_oneshot_run();
+    voltage_level_t volt_level;
+    bool oneshot_run = false;
 
+    tank_level_t level = get_tank_water_level();
     set_water_level(level);
+
+    if(true == is_wlc_automode()) {
+        volt_level = get_line_voltage_level();
+        oneshot_run = is_oneshot_run();
+    } else {
+        // Don't monitor the line voltage
+        // Fake that we have enough voltage
+        volt_level = VOLTAGE_GOOD;
+    }
 
     if((level < TANK_LEVEL_40 && volt_level >= VOLTAGE_OK)) {
         turn_on_water_pump(0);
@@ -104,14 +111,18 @@ void SysTick_Handler() {
     if(level == TANK_LEVEL_100) {
         turn_off_water_pump();
     }
-    // Run the following block in every sec
-    ST_EVERY_n_SEC_START(1)
-    decr_pumping_time_btn_count_down();
-    ST_EVERY_SEC_END()
 
-    ST_EVERY_n_SEC_START(5)
-    calc_line_voltage = true;
-    ST_EVERY_SEC_END()
+    if(true == is_wlc_automode()) {
+        // Run the following block in every sec
+        ST_EVERY_n_SEC_START(1);
+        decr_pumping_time_btn_count_down();
+        ST_EVERY_SEC_END();
+
+        // Run the following block in every 5 sec
+        ST_EVERY_n_SEC_START(5);
+        calc_line_voltage = true;
+        ST_EVERY_SEC_END();
+    }
 }
 
 /**
