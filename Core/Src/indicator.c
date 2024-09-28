@@ -25,7 +25,9 @@
 #define DRY_RUN_HOLD_TIME   20
 
 static volatile uint16_t rep_count = 0;
-static volatile uint8_t off_rep_count = 0;
+static volatile uint8_t led_off_rep_count = 0;
+static volatile uint8_t buz_off_rep_count = 0;
+static volatile uint8_t buz_rep_count = 0;
 static volatile pump_status_t pump_status = PUMP_OFF;
 static volatile uint8_t dry_pump_hold_time = DRY_RUN_HOLD_TIME;
 static volatile uint8_t led_state = 0;
@@ -49,23 +51,19 @@ static void on_timer_2_tick(bool done) {
     short_delay();
     set_gpio_val(LED_LEVEL_20_PIN, 0);
 
-    if(0 == off_rep_count) {
-        set_gpio_val(LED_DRY_RUN_PIN, 0);
+    if(0 == led_off_rep_count) {
+        set_gpio_val(PUMP_STATUS_PIN, 0);
     } else {
         if(0 == rep_count) {
             // Turn on at the beginning of count
-            set_gpio_val(LED_DRY_RUN_PIN, 1);
-            set_buzzer_on();
-        } else if(off_rep_count == rep_count) {
+            set_gpio_val(PUMP_STATUS_PIN, 1);
+        } else if(led_off_rep_count == rep_count) {
             // Turn of based on the status of motor
-            set_gpio_val(LED_DRY_RUN_PIN, 0);
-            set_buzzer_off();
+            set_gpio_val(PUMP_STATUS_PIN, 0);
         }
-        rep_count++;
 
-        if(rep_count > 300) {
-            // This case execute in every 30 * timer 2 tick = 1.5sec
-            rep_count = 0;
+        if(rep_count == 0) {
+            // This case execute in every 300 * timer 2 tick = 1.5sec
             dry_pump_hold_time--;
 
             if(get_pump_status() == PUMP_DRY_RUN) {
@@ -75,6 +73,22 @@ static void on_timer_2_tick(bool done) {
                 }
             }
         }
+    }
+
+    if(0 == buz_off_rep_count) {
+        set_gpio_val(BUZZER_PIN, 0);
+    } else if(0 != buz_rep_count) {
+        if(0 == rep_count) {
+            set_gpio_val(BUZZER_PIN, 1);
+        } else if(buz_off_rep_count == rep_count) {
+            set_gpio_val(BUZZER_PIN, 0);
+            buz_rep_count--;
+        }
+    }
+
+    rep_count++;
+    if(rep_count > 300) {
+        rep_count = 0;
     }
 }
 
@@ -87,14 +101,16 @@ void init_indicators() {
 
     set_gpio_dir(BUZZER_PIN, GPIO_OUTPUT);
 
-    set_gpio_dir(LED_DRY_RUN_PIN, GPIO_OUTPUT);
+    set_gpio_dir(PUMP_STATUS_PIN, GPIO_OUTPUT);
     set_gpio_dir(LOW_VOLTAGE_INDIC_PIN, GPIO_OUTPUT);
-    init_50ms_timer_2();
+    init_5ms_timer_2();
 
     // Run timer 2 forever and set status LED as off
     run_timer_2(0, on_timer_2_tick);
     set_pump_status(PUMP_OFF);
 }
+
+static tank_level_t prev_stat = TANK_LEVEL_0;
 
 void set_water_level(tank_level_t level) {
     led_state = 0;
@@ -112,6 +128,12 @@ void set_water_level(tank_level_t level) {
         case TANK_LEVEL_0:
             break;
     }
+
+    if(level != prev_stat) {
+        set_buzzer_on(level, 10 * (11-level*2));
+    }
+
+    prev_stat = level;
 }
 
 pump_status_t get_pump_status() {
@@ -121,14 +143,14 @@ pump_status_t get_pump_status() {
 void set_pump_status(pump_status_t status) {
     pump_status = status;
     if(PUMP_OFF == status) {
-        off_rep_count = 0;
+        led_off_rep_count = 0;
         // set_timer_2_enable(false);
     } else {
         set_timer_2_enable(true);
         if(PUMP_RUN == status) {
-            off_rep_count = 10;
+            led_off_rep_count = 10;
         } else {
-            off_rep_count = 150;
+            led_off_rep_count = 150;
         }
     }
 }
@@ -141,10 +163,7 @@ void clear_low_voltage_status() {
     set_gpio_val(LOW_VOLTAGE_INDIC_PIN, 0);
 }
 
-void set_buzzer_on() {
-    set_gpio_val(BUZZER_PIN, 1);
-}
-
-void set_buzzer_off() {
-    set_gpio_val(BUZZER_PIN, 0);
+void set_buzzer_on(uint8_t count, uint8_t off_count) {
+    buz_rep_count = count;
+    buz_off_rep_count = off_count;
 }

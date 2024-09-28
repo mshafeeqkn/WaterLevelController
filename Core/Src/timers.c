@@ -29,7 +29,7 @@ static uint32_t timer3_intr_count = 0;
 static uint32_t timer3_rep_count  = 0;
 
 // -----------------------------------------------------------------------------
-// Timer 2 related functions - used to get 50ms delay to show the water pump
+// Timer 2 related functions - used to get 5ms delay to show the water pump
 // status in LED panel.
 // -----------------------------------------------------------------------------
 
@@ -57,21 +57,21 @@ void TIM2_IRQHandler() {
     }
 }
 
-void run_timer_2(uint32_t tick_50ms, timer_callback_t callback) {
+void run_timer_2(uint32_t tick_5ms, timer_callback_t callback) {
     // Set the callback function for timer2
     timer2_cb = callback;
-    timer2_rep_count = tick_50ms;
+    timer2_rep_count = tick_5ms;
 
     // Start timer
     set_timer_2_enable(true);
 }
 
-void init_50ms_timer_2() {
+void init_5ms_timer_2() {
     // Enable system clock to TIM2
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 
-    // Set pre-scalar 8000; so each count will take
-    // 1ms delay since we are using 8MHz clock
+    // Set pre-scalar 800; so each count will take
+    // 100us delay since we are using 8MHz clock
     TIM2->PSC = 799;
 
     // Count 0 - 49 (both inclusive - so total 50)

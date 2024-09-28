@@ -46,7 +46,7 @@ extern "C" {
 #define     LED_LEVEL_20_PIN          GPIOA,5
 
 // Output Pin to show the inflow of water
-#define     LED_DRY_RUN_PIN           GPIOA,6
+#define     PUMP_STATUS_PIN           GPIOA,6
 
 // Output pin to control motor
 #define     PUMP_CONTROL_PIN          GPIOB,10
