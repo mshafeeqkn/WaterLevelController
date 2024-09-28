@@ -45,8 +45,8 @@ typedef void (*timer_callback_t) (bool done);
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void init_50ms_timer_2();
-void run_timer_2(uint32_t tick_50ms, timer_callback_t callback);
+void init_5ms_timer_2();
+void run_timer_2(uint32_t tick_5ms, timer_callback_t callback);
 void set_timer_2_enable(bool enable);
 
 void init_1s_timer_3();

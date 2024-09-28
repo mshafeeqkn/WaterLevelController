@@ -46,7 +46,7 @@ extern "C" {
 #define     LED_LEVEL_20_PIN          GPIOA,5
 
 // Output Pin to show the inflow of water
-#define     LED_DRY_RUN_PIN           GPIOA,6
+#define     PUMP_STATUS_PIN           GPIOA,6
 
 // Output pin to control motor
 #define     PUMP_CONTROL_PIN          GPIOB,10
@@ -63,7 +63,11 @@ extern "C" {
 // Analog input pin to monitor the line voltage
 #define     VOLTAGE_MONITOR_PIN       /*GPIOA,*/7
 
+// LED to show low voltage in auto mode
 #define     LOW_VOLTAGE_INDIC_PIN     GPIOA,11
+
+// Buzzer pin
+#define     BUZZER_PIN                GPIOA,12
 
 #define     I2C_SLAVE_ADDRESS         0x28
 

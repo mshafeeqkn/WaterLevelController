@@ -39,8 +39,8 @@ C_SOURCES =  \
 Core/Src/config_mgr.c \
 Core/Src/flash_ops.c \
 Core/Src/gpio.c \
+Core/Src/indicator.c \
 Core/Src/i2c.c \
-Core/Src/led_indicator.c \
 Core/Src/main.c \
 Core/Src/pump_controller.c \
 Core/Src/rtc.c \

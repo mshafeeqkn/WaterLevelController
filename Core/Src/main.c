@@ -21,7 +21,7 @@
 #include "uart.h"
 #include "rtc.h"
 #include "water_monitor.h"
-#include "led_indicator.h"
+#include "indicator.h"
 #include "pump_controller.h"
 #include "voltage_monitor.h"
 #include "config_mgr.h"
@@ -43,6 +43,7 @@ static volatile bool calc_line_voltage = false;
 static volatile bool stopped_forcefully = false;
 
 #ifdef DEBUG_ENABLED
+#endif // DEBUG_ENABLED
 typedef enum {
     TURN_OFF,
     TURN_ON,
@@ -63,7 +64,6 @@ void set_error() {
     TURN_ON_LED();
 }
 
-#endif // DEBUG_ENABLED
 
 void SysTick_Handler() {
     voltage_level_t volt_level;
@@ -161,13 +161,13 @@ int main(void) {
     __disable_irq();
 
 #ifdef DEBUG_ENABLED
+#endif
     RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
     // Configure PC13 pin as output push-pull maximum speed 10MHz
     GPIOC->CRH &= ~(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
     GPIOC->CRH |= GPIO_CRH_MODE13_0;
     TURN_OFF_LED();
-#endif
 
     // Configure system clock (8MHz crystal with no pre-scaler)
     config_sys_clock();
@@ -181,8 +181,8 @@ int main(void) {
     // Initialize configuration manager
     init_config_mgr();
 
-    // Initialize the LED indicator board
-    init_led_indicators();
+    // Initialize the LED & buzzer indicator board
+    init_indicators();
 
     // Initialize the tank and pump monitor module
     init_tank_pump_monitor();

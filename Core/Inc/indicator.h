@@ -2,9 +2,9 @@
 /**
   ******************************************************************************
   * @file           : led_indicator.h
-  * @brief          : Header for led_indicator.c file.
+  * @brief          : Header for indicator.c file.
   *                   This file contains the defines of function to drive
-  *                   the LED indicator
+  *                   the LED and buzzer indicator
   ******************************************************************************
   * @attention
   *
@@ -20,8 +20,8 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LED_INDICATOR_H
-#define __LED_INDICATOR_H
+#ifndef __INDICATOR_H
+#define __INDICATOR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,12 +51,13 @@ typedef enum {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void init_led_indicators();
+void init_indicators();
 void set_pump_status(pump_status_t status);
 void set_water_level(tank_level_t level);
 pump_status_t get_pump_status();
 void set_low_voltage_status();
 void clear_low_voltage_status();
+void set_buzzer_on(uint8_t count, uint8_t off_count);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
@@ -66,4 +67,4 @@ void clear_low_voltage_status();
 }
 #endif
 
-#endif /* __LED_INDICATOR_H */
+#endif /* __INDICATOR_H */
