@@ -22,7 +22,11 @@
 #include "gpio.h"
 #include "timers.h"
 
+// How much time the pump should wait to see water
+// coming into the tank
 #define DRY_RUN_HOLD_TIME   20
+#define PUMP_BUZZ_DELAY     240
+#define TANK_BUZZ_DELAY     20
 
 static volatile uint16_t rep_count = 0;
 static volatile uint8_t led_off_rep_count = 0;
@@ -75,9 +79,7 @@ static void on_timer_2_tick(bool done) {
         }
     }
 
-    if(0 == buz_off_rep_count) {
-        set_gpio_val(BUZZER_PIN, 0);
-    } else if(0 != buz_rep_count) {
+    if(0 != buz_rep_count) {
         if(0 == rep_count) {
             set_gpio_val(BUZZER_PIN, 1);
         } else if(buz_off_rep_count == rep_count) {
@@ -130,7 +132,7 @@ void set_water_level(tank_level_t level) {
     }
 
     if(level != prev_stat) {
-        set_buzzer_on(level, 10 * (11-level*2));
+        set_buzzer_on(level, TANK_BUZZ_DELAY);
     }
 
     prev_stat = level;
@@ -144,13 +146,14 @@ void set_pump_status(pump_status_t status) {
     pump_status = status;
     if(PUMP_OFF == status) {
         led_off_rep_count = 0;
-        // set_timer_2_enable(false);
     } else {
         set_timer_2_enable(true);
         if(PUMP_RUN == status) {
             led_off_rep_count = 10;
+            set_buzzer_on(2, PUMP_BUZZ_DELAY);
         } else {
             led_off_rep_count = 150;
+            set_buzzer_on(3, PUMP_BUZZ_DELAY);
         }
     }
 }
