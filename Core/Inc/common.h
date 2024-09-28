@@ -83,7 +83,7 @@ extern "C" {
 
 // How many second the pump should keep the
 // dry run status.
-#define     DRY_RUN_HOLD_TIME         20
+#define     DRY_RUN_HOLD_TIME         300
 
 // How many seconds the device should detect
 // to set the dry run status

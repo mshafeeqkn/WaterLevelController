@@ -57,7 +57,7 @@ void set_water_level(tank_level_t level);
 pump_status_t get_pump_status();
 void set_low_voltage_status();
 void clear_low_voltage_status();
-void set_buzzer_on(uint8_t count, uint8_t off_count);
+void set_buzzer_on(uint8_t count, uint8_t delay);
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */

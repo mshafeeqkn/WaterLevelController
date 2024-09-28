@@ -29,10 +29,12 @@
  *
  * @param byte to be sent
  */
+#if DEBUG_ENABLED
 static void uart1_send_byte(uint8_t ch) {
     while((USART1->SR & USART_SR_TXE) == 0) {}
     USART1->DR = ch;
 }
+#endif
 
 /**
  * @brief Send formatted string through UART1
@@ -40,6 +42,7 @@ static void uart1_send_byte(uint8_t ch) {
  * @param format - formatted string
  */
 void uart1_send_string(const char *format, ...) {
+#if DEBUG_ENABLED
     va_list args;
     char buffer[128];
     size_t i, len;
@@ -55,6 +58,7 @@ void uart1_send_string(const char *format, ...) {
 
     // Wait until transmission complted
     while((USART1->SR & USART_SR_TC) == 0) {}
+#endif
 }
 
 /**

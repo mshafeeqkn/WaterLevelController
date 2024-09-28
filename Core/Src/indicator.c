@@ -24,7 +24,6 @@
 
 // How much time the pump should wait to see water
 // coming into the tank
-#define DRY_RUN_HOLD_TIME   20
 #define PUMP_BUZZ_DELAY     240
 #define TANK_BUZZ_DELAY     20
 
@@ -33,7 +32,7 @@ static volatile uint8_t led_off_rep_count = 0;
 static volatile uint8_t buz_off_rep_count = 0;
 static volatile uint8_t buz_rep_count = 0;
 static volatile pump_status_t pump_status = PUMP_OFF;
-static volatile uint8_t dry_pump_hold_time = DRY_RUN_HOLD_TIME;
+static volatile uint16_t dry_pump_hold_time = DRY_RUN_HOLD_TIME;
 static volatile uint8_t led_state = 0;
 
 #define short_delay()     for(int i = 0; i < 150; i++)
@@ -132,6 +131,7 @@ void set_water_level(tank_level_t level) {
     }
 
     if(level != prev_stat) {
+        uart1_send_string("Water level: %u\r\n", level);
         set_buzzer_on(level, TANK_BUZZ_DELAY);
     }
 
@@ -142,8 +142,12 @@ pump_status_t get_pump_status() {
     return pump_status;
 }
 
+pump_status_t prev_status = PUMP_OFF;
 void set_pump_status(pump_status_t status) {
     pump_status = status;
+    if(status != prev_status) {
+        uart1_send_string("Pump status: %u\r\n", status);
+    }
     if(PUMP_OFF == status) {
         led_off_rep_count = 0;
     } else {
@@ -156,6 +160,7 @@ void set_pump_status(pump_status_t status) {
             set_buzzer_on(3, PUMP_BUZZ_DELAY);
         }
     }
+    prev_status = status;
 }
 
 void set_low_voltage_status() {
@@ -166,7 +171,8 @@ void clear_low_voltage_status() {
     set_gpio_val(LOW_VOLTAGE_INDIC_PIN, 0);
 }
 
-void set_buzzer_on(uint8_t count, uint8_t off_count) {
+void set_buzzer_on(uint8_t count, uint8_t delay) {
+    uart1_send_string("buzzer: cnt: %u; delay: %u\r\n", count, delay);
     buz_rep_count = count;
-    buz_off_rep_count = off_count;
+    buz_off_rep_count = delay;
 }
