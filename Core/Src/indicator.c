@@ -1,8 +1,8 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : led_indicator.c
-  * @brief          : The driver functions related to the LED indicator
+  * @file           : indicator.c
+  * @brief          : The driver functions related to the LED and buzzer indicator
   ******************************************************************************
   * @attention
   *
@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include <stdbool.h>
-#include "led_indicator.h"
+#include "indicator.h"
 #include "gpio.h"
 #include "timers.h"
 
@@ -55,9 +55,11 @@ static void on_timer_2_tick(bool done) {
         if(0 == rep_count) {
             // Turn on at the beginning of count
             set_gpio_val(LED_DRY_RUN_PIN, 1);
+            set_buzzer_on();
         } else if(off_rep_count == rep_count) {
             // Turn of based on the status of motor
             set_gpio_val(LED_DRY_RUN_PIN, 0);
+            set_buzzer_off();
         }
         rep_count++;
 
@@ -76,12 +78,14 @@ static void on_timer_2_tick(bool done) {
     }
 }
 
-void init_led_indicators() {
+void init_indicators() {
     set_gpio_dir(LED_LEVEL_100_PIN, GPIO_OUTPUT);
     set_gpio_dir(LED_LEVEL_80_PIN, GPIO_OUTPUT);
     set_gpio_dir(LED_LEVEL_60_PIN, GPIO_OUTPUT);
     set_gpio_dir(LED_LEVEL_40_PIN, GPIO_OUTPUT);
     set_gpio_dir(LED_LEVEL_20_PIN, GPIO_OUTPUT);
+
+    set_gpio_dir(BUZZER_PIN, GPIO_OUTPUT);
 
     set_gpio_dir(LED_DRY_RUN_PIN, GPIO_OUTPUT);
     set_gpio_dir(LOW_VOLTAGE_INDIC_PIN, GPIO_OUTPUT);
@@ -135,4 +139,12 @@ void set_low_voltage_status() {
 
 void clear_low_voltage_status() {
     set_gpio_val(LOW_VOLTAGE_INDIC_PIN, 0);
+}
+
+void set_buzzer_on() {
+    set_gpio_val(BUZZER_PIN, 1);
+}
+
+void set_buzzer_off() {
+    set_gpio_val(BUZZER_PIN, 0);
 }

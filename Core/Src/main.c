@@ -21,7 +21,7 @@
 #include "uart.h"
 #include "rtc.h"
 #include "water_monitor.h"
-#include "led_indicator.h"
+#include "indicator.h"
 #include "pump_controller.h"
 #include "voltage_monitor.h"
 #include "config_mgr.h"
@@ -181,8 +181,8 @@ int main(void) {
     // Initialize configuration manager
     init_config_mgr();
 
-    // Initialize the LED indicator board
-    init_led_indicators();
+    // Initialize the LED & buzzer indicator board
+    init_indicators();
 
     // Initialize the tank and pump monitor module
     init_tank_pump_monitor();

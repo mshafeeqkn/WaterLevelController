@@ -23,7 +23,7 @@
 #include "rtc.h"
 #include "timers.h"
 #include "flash_ops.h"
-#include "led_indicator.h"
+#include "indicator.h"
 #include "water_monitor.h"
 #include "common.h"
 
